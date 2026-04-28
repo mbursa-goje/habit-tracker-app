@@ -1096,7 +1096,701 @@ This mobile footer matches the mobile reference.
 It is hidden on desktop because the split card already carries enough brand
 context.
 
+## `src/components/auth/SignupForm.tsx`
+
+Purpose: render and process the `/signup` form required by the TRD.
+
+```tsx
+"use client";
+```
+
+This marks the file as a Client Component.
+
+The component needs browser APIs.
+
+It uses `useState`.
+
+It reads and writes `localStorage`.
+
+Those operations cannot run inside a Server Component.
+
+```tsx
+import type { User } from "@/types/auth";
+```
+
+This imports the exact TRD `User` type.
+
+The form uses it to type the array stored under `habit-tracker-users`.
+
+`import type` keeps the import out of runtime JavaScript.
+
+```tsx
+import { AlertCircle, ArrowRight } from "lucide-react";
+```
+
+`AlertCircle` is used beside the visible error message.
+
+`ArrowRight` is used in the submit button.
+
+Icons help the form read as interactive without adding extra copy.
+
+```tsx
+import Link from "next/link";
+```
+
+`Link` is the Next.js component for internal navigation.
+
+The signup form uses it for the `/login` link.
+
+```tsx
+import { FormEvent, useState } from "react";
+```
+
+`FormEvent` gives the submit event a precise TypeScript type.
+
+`useState` stores email, password, and error values.
+
+```tsx
+function getStoredUsers(): User[] {
+```
+
+This helper reads users from `localStorage`.
+
+It returns an array every time.
+
+That keeps submit logic simple.
+
+```tsx
+const usersData = localStorage.getItem("habit-tracker-users");
+```
+
+This reads the exact TRD storage key for users.
+
+The value is either JSON text or `null`.
+
+```tsx
+if (!usersData) {
+  return [];
+}
+```
+
+If no users exist yet, return an empty array.
+
+This lets the first signup succeed cleanly.
+
+```tsx
+try {
+  return JSON.parse(usersData) as User[];
+} catch {
+  return [];
+}
+```
+
+`JSON.parse` converts stored text into JavaScript data.
+
+`as User[]` tells TypeScript the expected shape.
+
+The `catch` protects the page if localStorage contains invalid JSON.
+
+Returning `[]` is a safe fallback for this local-only stage.
+
+```tsx
+function createUserId(): string {
+```
+
+This helper creates a unique user id.
+
+The TRD requires `id` to be a string.
+
+```tsx
+if (typeof crypto !== "undefined" && crypto.randomUUID) {
+  return crypto.randomUUID();
+}
+```
+
+`crypto.randomUUID()` creates a strong browser-generated unique id.
+
+The guard checks that `crypto` exists before using it.
+
+This keeps the helper safe in unusual environments.
+
+```tsx
+return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+```
+
+This fallback still returns a unique-ish string.
+
+`Date.now()` adds the current timestamp.
+
+`Math.random()` adds random text.
+
+The fallback is not a security feature.
+
+It is only an id generator for localStorage records.
+
+```tsx
+export default function SignupForm() {
+```
+
+This exports the signup form as the default component.
+
+`src/app/signup/page.tsx` imports and renders it.
+
+```tsx
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+const [error, setError] = useState("");
+```
+
+`email` stores the current email input.
+
+`setEmail` updates email state.
+
+`password` stores the current password input.
+
+`setPassword` updates password state.
+
+`error` stores the visible form error.
+
+An empty error string means no error is shown.
+
+```tsx
+function handleSubmit(event: FormEvent<HTMLFormElement>) {
+```
+
+This function runs when the signup form is submitted.
+
+The event type says this is a form submit event.
+
+```tsx
+event.preventDefault();
+```
+
+This prevents the browser's default full-page form submission.
+
+React handles the signup in JavaScript.
+
+```tsx
+const normalizedEmail = email.trim().toLowerCase();
+```
+
+`trim()` removes accidental outer spaces.
+
+`toLowerCase()` makes duplicate email checks deterministic.
+
+Example: `USER@EXAMPLE.COM` and `user@example.com` become the same email.
+
+```tsx
+const users = getStoredUsers();
+```
+
+This loads the current local users.
+
+```tsx
+const existingUser = users.find((user) => user.email === normalizedEmail);
+```
+
+This checks for duplicate signup email.
+
+The TRD requires duplicate signup to be rejected.
+
+```tsx
+if (existingUser) {
+  setError("User already exists");
+  return;
+}
+```
+
+This shows the exact TRD duplicate message.
+
+The message must remain `User already exists`.
+
+`return` stops the rest of signup from running.
+
+```tsx
+if (!normalizedEmail || !password) {
+  setError("Email and password are required");
+  return;
+}
+```
+
+This handles missing values in JavaScript.
+
+The inputs also use `required`, but this keeps the logic explicit.
+
+The TRD requires both email and password.
+
+```tsx
+const newUser: User = {
+  id: createUserId(),
+  email: normalizedEmail,
+  password,
+  createdAt: new Date().toISOString(),
+};
+```
+
+This creates the new user object.
+
+`: User` forces the object to match the TRD type.
+
+`id` uses the helper above.
+
+`email` stores the normalized email.
+
+`password` stores the entered password for this local-only stage.
+
+`createdAt` stores an ISO timestamp.
+
+```tsx
+localStorage.setItem(
+  "habit-tracker-users",
+  JSON.stringify([...users, newUser]),
+);
+```
+
+This writes the updated users array to localStorage.
+
+The key is exactly `habit-tracker-users`.
+
+`[...users, newUser]` creates a new array with the new user appended.
+
+`JSON.stringify` converts the array into text for localStorage.
+
+```tsx
+localStorage.setItem(
+  "habit-tracker-session",
+  JSON.stringify({
+    userId: newUser.id,
+    email: newUser.email,
+  }),
+);
+```
+
+This logs the user in immediately after signup.
+
+The key is exactly `habit-tracker-session`.
+
+The stored object matches the TRD `Session` type.
+
+`userId` links the session to the new user.
+
+`email` stores the active user's email.
+
+```tsx
+window.location.href = "/dashboard";
+```
+
+This redirects to the protected dashboard after successful signup.
+
+```tsx
+data-testid="auth-signup-email"
+```
+
+This is required by the TRD.
+
+Tests use it to find the signup email input.
+
+```tsx
+data-testid="auth-signup-password"
+```
+
+This is required by the TRD.
+
+Tests use it to find the signup password input.
+
+```tsx
+data-testid="auth-signup-submit"
+```
+
+This is required by the TRD.
+
+Tests use it to submit the signup form.
+
+```tsx
+type="button"
+disabled
+```
+
+The social buttons are explicitly non-submit buttons.
+
+They are disabled because the TRD only allows local deterministic auth.
+
+Google or Apple auth would be outside this stage.
+
+## `src/app/signup/page.tsx`
+
+Purpose: render the `/signup` route shell and visual split layout.
+
+The page imports `SignupForm`.
+
+The page imports `CheckCircle2` for the brand mark.
+
+The route itself no longer owns signup logic.
+
+That logic lives in `SignupForm`.
+
+The top-level `<main>` creates the full-screen centered background.
+
+The card uses `grid grid-cols-1 md:grid-cols-2`.
+
+That means mobile has one stacked column.
+
+Desktop has two equal columns.
+
+The left `<aside>` is the blue brand panel.
+
+The right `<section>` centers the form.
+
+The avatar images are decorative.
+
+Their `alt=""` keeps screen readers from announcing meaningless avatar
+content.
+
+The page remains responsible for layout and branding.
+
+The form component remains responsible for state, validation, persistence, and
+redirect behavior.
+
 ## Current Remaining Work
+
+## `src/components/shared/SplashScreen.tsx`
+
+Purpose: render the testable splash screen required by the `/` route.
+
+```tsx
+import { CheckCircle2 } from "lucide-react";
+```
+
+This imports the checklist-style icon used in the splash brand mark.
+
+Lucide icons render as SVG React components.
+
+```tsx
+export default function SplashScreen() {
+```
+
+This exports the component as the default export.
+
+The root route imports and renders it immediately.
+
+```tsx
+return (
+  <main
+    data-testid="splash-screen"
+    className="grid min-h-screen place-items-center bg-[#f4f7ff] px-6 text-slate-950"
+  >
+```
+
+`data-testid="splash-screen"` is required by the TRD.
+
+Tests can use this attribute to confirm the splash is visible before redirect.
+
+`grid` turns the page into a CSS grid container.
+
+`min-h-screen` makes the splash fill at least the viewport height.
+
+`place-items-center` centers the splash content horizontally and vertically.
+
+`bg-[#f4f7ff]` applies the soft light background used by the login design.
+
+`px-6` adds horizontal padding so content does not touch small mobile edges.
+
+`text-slate-950` sets the default text color to near-black.
+
+```tsx
+<section className="flex flex-col items-center text-center">
+```
+
+`section` groups the splash content semantically.
+
+`flex flex-col` stacks the icon, title, copy, and progress bar vertically.
+
+`items-center` centers children horizontally.
+
+`text-center` centers text.
+
+```tsx
+<div className="grid h-20 w-20 place-items-center rounded-2xl border border-blue-200 bg-blue-50 text-blue-700 shadow-sm">
+```
+
+This creates the icon tile.
+
+`grid place-items-center` centers the icon inside the tile.
+
+`h-20 w-20` makes the tile 80px by 80px.
+
+`rounded-2xl` gives it a soft rounded shape.
+
+`border border-blue-200` adds a light blue outline.
+
+`bg-blue-50` gives the tile a pale blue background.
+
+`text-blue-700` controls the icon color.
+
+`shadow-sm` adds a subtle lift.
+
+```tsx
+<CheckCircle2 className="h-10 w-10" />
+```
+
+This renders the imported icon.
+
+`h-10 w-10` makes the icon 40px by 40px.
+
+```tsx
+<h1 className="mt-6 text-3xl font-bold tracking-tight text-blue-700">
+  Habit Tracker
+</h1>
+```
+
+The TRD requires the splash screen to show the app name `Habit Tracker`.
+
+`mt-6` creates spacing above the title.
+
+`text-3xl` makes the title prominent without becoming oversized.
+
+`font-bold` increases weight.
+
+`tracking-tight` slightly tightens the title spacing.
+
+`text-blue-700` ties the title to the app accent color.
+
+```tsx
+<p className="mt-3 max-w-xs text-sm font-medium leading-6 text-slate-500">
+```
+
+This supporting copy makes the splash feel intentional.
+
+`mt-3` spaces it below the title.
+
+`max-w-xs` keeps the sentence narrow and readable.
+
+`text-sm` keeps the copy secondary.
+
+`font-medium` improves legibility.
+
+`leading-6` gives the text comfortable line height.
+
+`text-slate-500` lowers emphasis.
+
+```tsx
+<div className="mt-8 h-1.5 w-44 overflow-hidden rounded-full bg-blue-100">
+```
+
+This creates the loading track.
+
+`mt-8` separates it from the copy.
+
+`h-1.5` makes the bar thin.
+
+`w-44` gives it a stable width.
+
+`overflow-hidden` clips the inner bar to the rounded track.
+
+`rounded-full` makes both ends pill-shaped.
+
+`bg-blue-100` gives the track a pale blue color.
+
+```tsx
+<div className="h-full w-2/3 animate-pulse rounded-full bg-blue-700" />
+```
+
+This creates the visible loading fill.
+
+`h-full` fills the track height.
+
+`w-2/3` fills about two thirds of the track.
+
+`animate-pulse` adds simple loading motion.
+
+`rounded-full` matches the parent pill shape.
+
+`bg-blue-700` makes the fill the primary blue accent.
+
+## `src/app/page.tsx`
+
+Purpose: implement the TRD splash and boot redirect route at `/`.
+
+```tsx
+"use client";
+```
+
+The root page must read `localStorage`.
+
+`localStorage` only exists in the browser.
+
+The file also uses `useEffect` and `useRouter`.
+
+Those APIs require a Client Component.
+
+```tsx
+import SplashScreen from "@/components/shared/SplashScreen";
+```
+
+This imports the visual splash component.
+
+Keeping the UI in a separate component makes the root page focused on boot
+logic.
+
+```tsx
+import { useRouter } from "next/navigation";
+```
+
+This imports the App Router navigation hook.
+
+The bundled Next docs say `useRouter` should come from `next/navigation` in
+the App Router.
+
+```tsx
+import { useEffect } from "react";
+```
+
+`useEffect` runs browser-side after the splash first renders.
+
+That order matters because the TRD requires the splash screen to render
+immediately.
+
+```tsx
+const SPLASH_DELAY_MS = 1200;
+```
+
+This controls how long the splash remains visible.
+
+The TRD target duration is between 800ms and 2000ms.
+
+`1200` sits safely inside that range.
+
+```tsx
+function hasStoredSession() {
+```
+
+This helper checks whether a valid session exists.
+
+The helper keeps the effect easier to read.
+
+```tsx
+const sessionData = localStorage.getItem("habit-tracker-session");
+```
+
+This reads the exact TRD session key.
+
+If the user is logged in, this should contain JSON session text.
+
+```tsx
+if (!sessionData) {
+  return false;
+}
+```
+
+If the key is missing, there is no active session.
+
+The root page should redirect unauthenticated users to `/login`.
+
+```tsx
+try {
+  const session = JSON.parse(sessionData) as {
+    userId?: unknown;
+    email?: unknown;
+  };
+```
+
+`JSON.parse` converts the stored text into an object.
+
+The temporary type uses `unknown` because localStorage data cannot be trusted.
+
+The code validates the fields before accepting the session.
+
+```tsx
+return typeof session.userId === "string" && typeof session.email === "string";
+```
+
+The session is treated as valid only when both required TRD fields are strings.
+
+`userId` connects the session to the active user.
+
+`email` stores the active user's email.
+
+```tsx
+} catch {
+  localStorage.removeItem("habit-tracker-session");
+  return false;
+}
+```
+
+If the stored session is invalid JSON, remove it.
+
+Then report that no valid session exists.
+
+This prevents a broken localStorage value from trapping the app.
+
+```tsx
+export default function HomePage() {
+```
+
+This exports the `/` route component.
+
+Next.js renders this file when the user visits the root URL.
+
+```tsx
+const router = useRouter();
+```
+
+This gets the router object.
+
+The page uses it to redirect after the splash delay.
+
+```tsx
+useEffect(() => {
+```
+
+This effect runs after the component renders in the browser.
+
+That lets the splash screen appear first.
+
+```tsx
+const redirectTimer = window.setTimeout(() => {
+  router.replace(hasStoredSession() ? "/dashboard" : "/login");
+}, SPLASH_DELAY_MS);
+```
+
+`window.setTimeout` waits before redirecting.
+
+The delay makes the splash screen visible long enough for tests.
+
+`hasStoredSession()` decides where to send the user.
+
+If a session exists, the user goes to `/dashboard`.
+
+If no session exists, the user goes to `/login`.
+
+`router.replace` navigates without adding `/` as a new browser history entry.
+
+This means pressing Back from `/login` or `/dashboard` does not bounce the user
+back to the splash screen.
+
+```tsx
+return () => window.clearTimeout(redirectTimer);
+```
+
+This cleanup cancels the timer if the component unmounts early.
+
+It is a normal React safety pattern for timers.
+
+```tsx
+}, [router]);
+```
+
+The effect depends on `router`.
+
+React uses the dependency array to know when the effect should rerun.
+
+```tsx
+return <SplashScreen />;
+```
+
+The root route always renders the splash immediately.
+
+The redirect happens afterward in the effect.
 
 The login route is functional.
 
