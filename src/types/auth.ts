@@ -1,13 +1,11 @@
 export type User = {
-    id: string;
-    email: string;
-    name: string;
-    password: string;
-    createdAt: string;
+  id: string;
+  email: string;
+  password: string;
+  createdAt: string;
 };
 
 export type Session = {
-    userId: string;
-    email: string;
-    name: string;
+  userId: string;
+  email: string;
 };
