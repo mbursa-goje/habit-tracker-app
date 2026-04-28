@@ -1,183 +1,281 @@
-// This is a directive that tells Next.js this file is a Client Component
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-    CalendarDays,
-    TrendingUp,
-    User,
-    LogOut,
-    Plus,
-    Search,
-    Bell,
-    Settings,
-} from 'lucide-react';
+import { Habit } from "@/types/habit";
 import { Session } from "@/types/auth";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Bell,
+  CalendarDays,
+  CheckCircleIcon,
+  LogOut,
+  Plus,
+  Settings,
+  TrendingUp,
+  User,
+} from "lucide-react";
 
 const navItems = [
-    { name: 'Daily', icon: CalendarDays, active: true },
-    { name: 'Trends', icon: TrendingUp, active: false },
-    { name: 'Profile', icon: User, active: false }
+  { name: "Today", icon: CalendarDays, active: true },
+  { name: "Stats", icon: TrendingUp, active: false },
+  { name: "Add", icon: Plus, active: false },
+  { name: "Profile", icon: User, active: false },
 ];
 
+function getTodayIsoDate() {
+  return new Date().toISOString().split("T")[0];
+}
+
 export default function Dashboard() {
-    const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [habits, setHabits] = useState<Habit[]>([]);
 
+  useEffect(() => {
+    const sessionData = localStorage.getItem("habit-tracker-session");
+    if (!sessionData) {
+      window.location.href = "/login";
+      return;
+    }
 
-    useEffect(() => {
-        const sessionData = localStorage.getItem('habit-tracker-session');
-        if (sessionData) {
-            setSession(JSON.parse(sessionData));
-        } else {
-            window.location.href = '/login'; //Redirect if no session
-        }
-    }, []);
+    const parsedSession = JSON.parse(sessionData) as Session;
+    setSession(parsedSession);
 
-    if (!session) return <div>Loading...</div>
+    const habitsData = localStorage.getItem("habit-tracker-habits");
+    const allHabits = habitsData ? (JSON.parse(habitsData) as Habit[]) : [];
+    setHabits(allHabits);
+  }, []);
 
-    return (
-        <div className="flex min-h-screen bg-[#f8f9fa] font-['Google_Sans',sans-serif]">
+  const today = getTodayIsoDate();
 
-            {/* Desktop Sidebar */}
-            <aside className="hidden md:flex flex-col w-72 bg-white border-r border-[#e8f0fe] p-6 fixed h-full">
-                <div className="mb-10">
-                    <h1 className="text-2xl font-bold text-[#1a73e8] tracking tight">Habitly</h1>
-                    <p className="text-[10px] text-slate-100 mt-1 uppercase">Precision Growth</p>
-                </div>
+  const userHabits = useMemo(
+    () => habits.filter((habit) => habit.userId === session?.userId),
+    [habits, session?.userId],
+  );
 
-                {/* Navigation */}
-                <nav className="flex-1 flex flex-col gap-4">
-                    {navItems.map((item) => (
-                        <button
-                            key={item.name}
-                            className={`flex items-center gap-4 w-full px-4 py-3 rounded-xl transition-all duration-200 ${item.active
-                                ? 'bg-blue-50 text-blue-600 shadow-sm'
-                                : 'text-slate-400 hover:text-slate-600'
-                                }`}>
-                            <div className={item.active ? 'text-blue-600' : 'text-slate-400'}>
-                                <item.icon size={20} />
-                            </div>
-                            <span className="text-[14px] font-medium">{item.name}</span>
-                        </button>
-                    ))}
+  const activeCount = userHabits.length;
+  const doneTodayCount = userHabits.filter((habit) =>
+    habit.completions.includes(today),
+  ).length;
+  const progressPercent =
+    activeCount === 0 ? 0 : Math.round((doneTodayCount / activeCount) * 100);
+  const previewHabits = userHabits.slice(0, 4);
 
-                    <button
-                        data-testid="auth-logout-button"
-                        className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
-                        onClick={() => {
-                            localStorage.removeItem('habit-tracker-session');
-                            window.location.href = '/login';
-                        }}>
-                        <div className="text-inherit">
-                            <LogOut size={20} />
-                        </div>
-                        <span className="text-[14px] font-medium text-slate-500">Log Out</span>
-                    </button>
-                </nav>
+  if (!session) return <div className="p-8 text-slate-500">Loading...</div>;
 
-                {/* User Profile Card */}
-                <div className="mt-auto p-4 bg-slate-50 border-slate-100 flex items-center gap-3 rounded-2xl">
-                    <div className="w-10 h-10 rounded-lg bg-slate-800 overflow-hidden border border-slate-200">
-                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${session.name}`} alt={session.name} />
-                    </div>
-                    <div>
-                        <p className="text-sm font-bold text-slate-800 leading-tight">Godwin Goje</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Pro Member</p>
-                    </div>
-                </div>
-            </aside>
-
-
-            <main className="flex-1 md:ml-72 p-8">
-                {/* Header with search Icons */}
-                <header className="flex justify-between items-center mb-10">
-                    <div className="relative w-96 group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-                        <input type="text"
-                            placeholder="Search habits..."
-                            className="w-full bg-white border border-slate-100 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400" />
-                    </div>
-                    <div className="flex items-center gap-6 text-slate-400">
-                        <button>
-                            <Bell size={20} />
-                        </button>
-                        <button>
-                            <Settings size={20} />
-                        </button>
-                    </div>
-                </header>
-
-                <div className="mb-10">
-                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
-                        Morning, <span className="text-blue-600">{session.name}.</span>
-                    </h1>
-                    <p className="text-slate-500 mt-2 font-medium">You're on a 12-day streak. Keep the momentum.</p>
-                </div>
-
-
-                <div>
-                    <div>
-                        <div>
-                            <div>
-                                <h2>Today's Progress</h2>
-                                <p></p>
-                            </div>
-                            <h1></h1>
-                        </div>
-
-                        {/* Progress Bar */}
-                        <div></div>
-
-                        {/* Progress grid cards */}
-                        <div>
-                            <div>
-                                <h4>ACTIVE</h4>
-                                <div></div>
-                            </div>
-                            <div>
-                                <h4>DONE</h4>
-                                <div></div>
-                            </div>
-                            <div>
-                                <h4>STREAK</h4>
-                                <div></div>
-                            </div>
-                            <div>
-                                <h4>BEST</h4>
-                                <div></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3>Consistency is key</h3>
-                        <p>Success is the sum of small <br /> repeated efforts day in and day <br /> out</p>
-                        <button>
-                            <p>View Analytics</p>
-                        </button>
-                    </div>
-                </div>
-
-
-                <div>
-                    <h3>Active Habits</h3>
-                    <p>View All</p>
-                </div>
-
-                {/* Active Habits Grid Cards */}
-                <div>
-
-                </div>
-
-
-                <button
-                    data-testid="create-habit-button"
-                    className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-2xl shadow-xl hover:scale-110 transition-transform">
-                    <Plus size={28}></Plus>
-                </button>
-            </main>
-
-
+  return (
+    <div className="flex min-h-screen bg-[#f5f7fb]" data-testid="dashboard-page">
+      <aside className="hidden md:flex fixed h-full w-64 flex-col border-r border-slate-200 bg-white p-5">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-700">Habit Tracker</h1>
         </div>
-    )
+
+        <nav className="flex flex-col gap-2">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${
+                item.active
+                  ? "bg-blue-50 text-blue-700"
+                  : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              <item.icon size={18} />
+              {item.name}
+            </button>
+          ))}
+        </nav>
+
+        <div className="mt-auto rounded-xl border border-slate-200 bg-white p-4">
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-500">
+            Pro Plan
+          </p>
+          <div className="mb-3 h-2 w-full rounded-full bg-slate-200">
+            <div className="h-full w-4/5 rounded-full bg-blue-700" />
+          </div>
+          <button className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50">
+            Manage Subscription
+          </button>
+        </div>
+      </aside>
+
+      <main className="flex-1 p-4 md:ml-64 md:p-6 lg:p-7">
+        <header className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-4xl font-black tracking-tight text-slate-900">
+              Performance Dashboard
+            </h2>
+            <p className="mt-1 text-sm font-medium text-slate-500">
+              Monday, Oct 23 • Day {doneTodayCount + 10} Streak
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50">
+              <Bell size={18} />
+            </button>
+            <button className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+              + New Habit
+            </button>
+          </div>
+        </header>
+
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="space-y-4 lg:col-span-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
+                <div className="flex items-center gap-4 md:col-span-1">
+                  <div
+                    className="grid h-24 w-24 place-items-center rounded-full"
+                    style={{
+                      background: `conic-gradient(#1d4ed8 ${progressPercent * 3.6}deg, #e2e8f0 0deg)`,
+                    }}
+                  >
+                    <div className="grid h-20 w-20 place-items-center rounded-full bg-white">
+                      <div className="text-center">
+                        <p className="text-4xl font-black text-slate-900">{progressPercent}%</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                          Daily Goal
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                    Completed
+                  </p>
+                  <p className="mt-1 text-4xl font-extrabold text-slate-900">
+                    {doneTodayCount}/{activeCount || 1}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                    Total Time
+                  </p>
+                  <p className="mt-1 text-4xl font-extrabold text-slate-900">
+                    {(activeCount * 0.35).toFixed(1)}h
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                    Best Streak
+                  </p>
+                  <p className="mt-1 text-4xl font-extrabold text-slate-900">
+                    {Math.max(14, doneTodayCount + 8)} Days
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {userHabits.length === 0 ? (
+              <div
+                data-testid="empty-state"
+                className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500"
+              >
+                No habits yet. Click the new habit button to create one.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {previewHabits.map((habit) => {
+                  const isDoneToday = habit.completions.includes(today);
+                  return (
+                    <div
+                      key={habit.id}
+                      className={`rounded-2xl border bg-white p-4 ${
+                        isDoneToday ? "border-emerald-300" : "border-slate-200"
+                      }`}
+                    >
+                      <div className="mb-3 flex items-start justify-between">
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-900">{habit.name}</h3>
+                          <p className="mt-1 text-sm text-slate-500">
+                            {habit.description || "No description"}
+                          </p>
+                        </div>
+                        <CheckCircleIcon
+                          size={20}
+                          className={isDoneToday ? "text-emerald-500" : "text-slate-300"}
+                        />
+                      </div>
+                      <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                        <p className="text-xs font-bold uppercase tracking-widest text-amber-600">
+                          {habit.completions.length} day streak
+                        </p>
+                        <p className="text-xs font-semibold uppercase text-slate-400">Daily</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-800 p-5 text-white">
+              <div className="h-40 rounded-xl bg-gradient-to-b from-slate-500 to-slate-900 p-4">
+                <p className="mt-16 text-2xl italic leading-tight">
+                  "Discipline is the bridge between goals and accomplishment."
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="mb-4 text-xl font-bold text-slate-900">Weekly Consistency</h3>
+              <div className="mb-4 flex justify-between text-xs font-bold text-slate-400">
+                {["M", "T", "W", "T", "F", "S", "S"].map((day, idx) => (
+                  <span key={`${day}-${idx}`}>{day}</span>
+                ))}
+              </div>
+              <div className="space-y-2 border-t border-slate-100 pt-4 text-sm">
+                <p className="flex justify-between text-slate-600">
+                  <span>Peak Performance</span>
+                  <span className="font-bold text-slate-900">Wednesdays</span>
+                </p>
+                <p className="flex justify-between text-slate-600">
+                  <span>Avg. Completion</span>
+                  <span className="font-bold text-slate-900">{progressPercent}%</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-blue-700 p-5 text-white">
+              <p className="text-xs font-bold uppercase tracking-widest text-blue-200">Next Up</p>
+              <h3 className="mt-2 text-2xl font-bold">Evening Reflection</h3>
+              <p className="text-sm text-blue-100">Scheduled for 9:00 PM</p>
+              <button className="mt-4 w-full rounded-lg bg-blue-500 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-400">
+                Set Reminder
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <div className="fixed bottom-6 right-6 flex items-center gap-2">
+          <button
+            data-testid="auth-logout-button"
+            className="rounded-xl border border-slate-200 bg-white p-3 text-slate-600 hover:bg-slate-50"
+            onClick={() => {
+              localStorage.removeItem("habit-tracker-session");
+              window.location.href = "/login";
+            }}
+            aria-label="Log out"
+          >
+            <LogOut size={18} />
+          </button>
+          <button
+            data-testid="create-habit-button"
+            className="rounded-xl bg-blue-700 p-3 text-white shadow-lg hover:bg-blue-800"
+            aria-label="Create habit"
+          >
+            <Plus size={22} />
+          </button>
+          <button
+            className="rounded-xl border border-slate-200 bg-white p-3 text-slate-600 hover:bg-slate-50"
+            aria-label="Settings"
+          >
+            <Settings size={18} />
+          </button>
+        </div>
+      </main>
+    </div>
+  );
 }
