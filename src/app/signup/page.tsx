@@ -33,7 +33,7 @@ export default function SignupPage() {
                             ))}
 
                         </div>
-                    <p className="text-[10px] font-bold tracking-widest text-blue-200 uppercase">Join 12,000+ High-Performers</p>
+                        <p className="text-[10px] font-bold tracking-widest text-blue-200 uppercase">Join 12,000+ High-Performers</p>
                     </div>
                 </div>
 
@@ -63,7 +63,14 @@ export default function SignupPage() {
                             <div className="relative my-8">
                                 <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
 
-                                <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold text-slate-400 bg-white px-4"><span className="text-slate-500 w-full border-t border-slate-200 my-4"></span>Or continue with<span className="text-slate-500 w-full border-t border-slate-200 my-4"></span></div>
+                                <div className="flex items-center justify-center gap-1">
+
+                                    <span className="text-slate-500 w-full border-t border-slate-200 my-4"></span>
+                                    <div className="relative flex items-center flex-shrink-0 flex-1 whitespace-nowrap justify-center text-[10px] uppercase tracking-widest font-bold text-slate-400 bg-white px-4">
+                                        Or continue with
+                                    </div>
+                                    <span className="text-slate-500 w-full border-t border-slate-200 my-4"></span>
+                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4 mb-8">
                                 <button className="flex items-center justify-center gap-2 border border-slate-200 rounded-lg py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">
@@ -75,7 +82,7 @@ export default function SignupPage() {
                             </div>
                         </form>
                         <p className="text-center text-xs text-slate-500">Already have an account? <a href="/login" className="text-blue-600 font-bold hover:underline">Log In</a></p>
-                            <div className="text-slate-500 w-full border-t border-slate-200 my-4"></div>
+                        <div className="text-slate-500 w-full border-t border-slate-200 my-4"></div>
                         <div className="flex justify-center items-center gap-4">
                             <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">PRIVACY POLICY</p>
                             <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">TERMS OF SERVICE</p>
