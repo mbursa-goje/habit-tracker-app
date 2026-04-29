@@ -1,22 +1,12 @@
 "use client";
 
+import { createUserId, getStoredUsers } from "@/lib/auth";
+import { STORAGE_KEYS } from "@/lib/constants";
 import type { User } from "@/types/auth";
-import { readLocalStorageValue, setLocalStorageValue } from "@/lib/storage";
+import { setLocalStorageValue } from "@/lib/storage";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-
-function getStoredUsers(): User[] {
-  return readLocalStorageValue<User[]>("habit-tracker-users", []);
-}
-
-function createUserId(): string {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
 
 type SignupFormProps = {
   onSuccessRedirect?: (path: string) => void;
@@ -56,12 +46,12 @@ export default function SignupForm({
     };
 
     setLocalStorageValue(
-      "habit-tracker-users",
+      STORAGE_KEYS.users,
       [...users, newUser],
     );
 
     setLocalStorageValue(
-      "habit-tracker-session",
+      STORAGE_KEYS.session,
       {
         userId: newUser.id,
         email: newUser.email,

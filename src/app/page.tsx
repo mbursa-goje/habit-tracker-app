@@ -1,27 +1,24 @@
 "use client";
 
 import SplashScreen from "@/components/shared/SplashScreen";
+import { isSession } from "@/lib/auth";
+import { SPLASH_DELAY_MS, STORAGE_KEYS } from "@/lib/constants";
 import { readLocalStorageValue, removeLocalStorageValue } from "@/lib/storage";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-const SPLASH_DELAY_MS = 1200;
-
 function hasStoredSession() {
-  const session = readLocalStorageValue<{
-    userId?: unknown;
-    email?: unknown;
-  } | null>("habit-tracker-session", null);
+  const session = readLocalStorageValue<unknown>(STORAGE_KEYS.session, null);
 
   if (!session) {
     return false;
   }
 
-  if (typeof session.userId === "string" && typeof session.email === "string") {
+  if (isSession(session)) {
     return true;
   }
 
-  removeLocalStorageValue("habit-tracker-session");
+  removeLocalStorageValue(STORAGE_KEYS.session);
   return false;
 }
 

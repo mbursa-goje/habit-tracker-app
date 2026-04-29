@@ -1,14 +1,11 @@
 "use client";
 
-import type { User } from "@/types/auth";
-import { readLocalStorageValue, setLocalStorageValue } from "@/lib/storage";
+import { getStoredUsers } from "@/lib/auth";
+import { STORAGE_KEYS } from "@/lib/constants";
+import { setLocalStorageValue } from "@/lib/storage";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-
-function getStoredUsers(): User[] {
-  return readLocalStorageValue<User[]>("habit-tracker-users", []);
-}
 
 type LoginFormProps = {
   onSuccessRedirect?: (path: string) => void;
@@ -39,7 +36,7 @@ export default function LoginForm({
     }
 
     setLocalStorageValue(
-      "habit-tracker-session",
+      STORAGE_KEYS.session,
       {
         userId: matchingUser.id,
         email: matchingUser.email,

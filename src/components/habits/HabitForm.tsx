@@ -3,7 +3,7 @@
 import type { Habit } from "@/types/habit";
 import { validateHabitName } from "@/lib/validators";
 import { Save, X } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 
 export type HabitFormValues = {
   name: string;
@@ -21,12 +21,6 @@ export default function HabitForm({ habit, onSave, onCancel }: HabitFormProps) {
   const [name, setName] = useState(habit?.name ?? "");
   const [description, setDescription] = useState(habit?.description ?? "");
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setName(habit?.name ?? "");
-    setDescription(habit?.description ?? "");
-    setError(null);
-  }, [habit]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

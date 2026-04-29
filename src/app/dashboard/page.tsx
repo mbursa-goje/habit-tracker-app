@@ -1,7 +1,9 @@
 "use client";
 
-import HabitCard from "@/components/habits/HabitCard";
 import HabitForm, { type HabitFormValues } from "@/components/habits/HabitForm";
+import HabitList from "@/components/habits/HabitList";
+import { isSession } from "@/lib/auth";
+import { STORAGE_KEYS } from "@/lib/constants";
 import { toggleHabitCompletion } from "@/lib/habits";
 import {
   removeLocalStorageValue,
@@ -9,7 +11,6 @@ import {
   useLocalStorageValue,
 } from "@/lib/storage";
 import { calculateCurrentStreak } from "@/lib/streaks";
-import type { Session } from "@/types/auth";
 import type { Habit } from "@/types/habit";
 import {
   Bell,
@@ -20,7 +21,7 @@ import {
   TrendingUp,
   User,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 const EMPTY_HABITS: Habit[] = [];
 
@@ -43,34 +44,35 @@ function createHabitId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function isSession(value: unknown): value is Session {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "userId" in value &&
-    "email" in value &&
-    typeof value.userId === "string" &&
-    typeof value.email === "string"
-  );
+function subscribeToHydration() {
+  return () => undefined;
+}
+
+function getClientHydrationSnapshot() {
+  return true;
+}
+
+function getServerHydrationSnapshot() {
+  return false;
 }
 
 export default function Dashboard() {
+  const hasCheckedClientStorage = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot,
+  );
   const storedSession = useLocalStorageValue<unknown>(
-    "habit-tracker-session",
+    STORAGE_KEYS.session,
     null,
   );
   const habits = useLocalStorageValue<Habit[]>(
-    "habit-tracker-habits",
+    STORAGE_KEYS.habits,
     EMPTY_HABITS,
   );
   const session = isSession(storedSession) ? storedSession : null;
-  const [hasCheckedClientStorage, setHasCheckedClientStorage] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
-
-  useEffect(() => {
-    setHasCheckedClientStorage(true);
-  }, []);
 
   useEffect(() => {
     if (!hasCheckedClientStorage) {
@@ -83,7 +85,7 @@ export default function Dashboard() {
     }
 
     if (!session) {
-      removeLocalStorageValue("habit-tracker-session");
+      removeLocalStorageValue(STORAGE_KEYS.session);
       window.location.href = "/login";
     }
   }, [hasCheckedClientStorage, session, storedSession]);
@@ -110,7 +112,7 @@ export default function Dashboard() {
     : 0;
 
   function saveHabits(nextHabits: Habit[]) {
-    setLocalStorageValue("habit-tracker-habits", nextHabits);
+    setLocalStorageValue(STORAGE_KEYS.habits, nextHabits);
   }
 
   function openCreateForm() {
@@ -177,7 +179,7 @@ export default function Dashboard() {
   }
 
   function handleLogout() {
-    removeLocalStorageValue("habit-tracker-session");
+    removeLocalStorageValue(STORAGE_KEYS.session);
     window.location.href = "/login";
   }
 
@@ -270,6 +272,7 @@ export default function Dashboard() {
           <div className="space-y-4 lg:col-span-2">
             {isFormOpen && (
               <HabitForm
+                key={editingHabit?.id ?? "new-habit"}
                 habit={editingHabit}
                 onSave={handleSaveHabit}
                 onCancel={closeHabitForm}
@@ -350,18 +353,13 @@ export default function Dashboard() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                {userHabits.map((habit) => (
-                  <HabitCard
-                    key={habit.id}
-                    habit={habit}
-                    today={today}
-                    onToggleComplete={() => handleToggleHabit(habit.id)}
-                    onEdit={() => openEditForm(habit)}
-                    onDelete={() => handleDeleteHabit(habit.id)}
-                  />
-                ))}
-              </div>
+              <HabitList
+                habits={userHabits}
+                today={today}
+                onToggleComplete={handleToggleHabit}
+                onEdit={openEditForm}
+                onDelete={handleDeleteHabit}
+              />
             )}
           </div>
 

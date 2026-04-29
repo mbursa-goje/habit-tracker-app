@@ -28,16 +28,12 @@ export default function SignupPage() {
 
           <div className="mt-8 flex items-center gap-4">
             <div className="flex -space-x-2">
-              {[1, 2, 3].map((item) => (
+              {["A", "B", "C"].map((item) => (
                 <div
                   key={item}
-                  className="h-7 w-7 overflow-hidden rounded-full border-2 border-[#0056b3] bg-slate-200"
+                  className="grid h-7 w-7 place-items-center rounded-full border-2 border-[#0056b3] bg-blue-50 text-[10px] font-black text-blue-700"
                 >
-                  <img
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item}`}
-                    className="h-full w-full object-cover"
-                    alt=""
-                  />
+                  {item}
                 </div>
               ))}
             </div>
