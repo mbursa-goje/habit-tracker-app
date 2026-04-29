@@ -252,11 +252,6 @@ export default function Dashboard() {
                 <item.icon size={18} />
                 {item.name}
               </button>
-              {item.name === "Add" && (
-                <DashboardTooltip className="left-full top-1/2 ml-3 -translate-y-1/2">
-                  Add a new habit
-                </DashboardTooltip>
-              )}
             </div>
           ))}
         </nav>
@@ -278,7 +273,6 @@ export default function Dashboard() {
               <LogOut className="h-4 w-4" />
               Log Out
             </button>
-            <DashboardTooltip>Log out of this session</DashboardTooltip>
           </div>
         </div>
       </aside>
@@ -314,9 +308,6 @@ export default function Dashboard() {
                 <Plus className="h-4 w-4" />
                 New Habit
               </button>
-              <DashboardTooltip className="right-0 top-full mt-2">
-                Create a new habit
-              </DashboardTooltip>
             </div>
           </div>
           </div>
@@ -429,7 +420,6 @@ export default function Dashboard() {
                     <Plus className="h-4 w-4" />
                     Create Habit
                   </button>
-                  <DashboardTooltip>Create your first habit</DashboardTooltip>
                 </div>
               </div>
             ) : (

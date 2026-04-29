@@ -68,9 +68,6 @@ The helper also receives an optional `className`.
 
 The default position places the tooltip above the control.
 
-The sidebar Add tooltip overrides the position so it appears beside the
-sidebar item.
-
 The tooltip element uses:
 
 ```tsx
@@ -119,14 +116,23 @@ group-focus-within:opacity-100
 
 That means mouse users and keyboard users both get the same hint.
 
-Tooltips were added to these dashboard controls:
+Tooltips were kept only on icon-only mobile dashboard controls:
 
-- Sidebar Add button.
-- Header New Habit button.
-- Empty-state Create Habit button.
-- Sidebar logout button.
 - Mobile floating create button.
 - Mobile floating logout button.
+
+The desktop sidebar Add action has visible text.
+
+The header New Habit action has visible text.
+
+The empty-state Create Habit action has visible text.
+
+The sidebar Log Out action has visible text.
+
+Those text actions do not need tooltips because the label is already visible.
+
+That keeps tooltips reserved for places where the control is icon-only and the
+meaning is not visible on the screen.
 
 The required `data-testid="create-habit-button"` remains on the header create
 button.

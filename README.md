@@ -146,9 +146,9 @@ The dashboard keeps the TRD test IDs in place while adding user-facing polish:
   softened blue border.
 - Habit cards keep action areas responsive so edit, delete, completion, cancel,
   and confirmation controls do not become cramped on wider dashboard columns.
-- Create and logout controls expose hover/focus tooltips, including the sidebar
-  Add action, the top New Habit button, the empty-state Create Habit button, and
-  the mobile floating create/logout buttons.
+- Icon-only mobile create/logout controls expose hover/focus tooltips. Text
+  buttons such as Add, New Habit, Create Habit, and Log Out rely on their
+  visible labels instead of redundant tooltips.
 - Add and edit actions scroll the habit form into view so the user can
   immediately see the form they just opened.
 - Developer-only helper copy such as the old Stage Scope card was removed from
