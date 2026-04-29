@@ -166,8 +166,8 @@ The dashboard keeps the TRD test IDs in place while adding user-facing polish:
 - Empty states, dashboard summary tiles, the habit form performance summary,
   and the Next Up rail card use centered or stretched layouts to avoid awkward
   trailing blank space on larger screens. The no-habits panel uses responsive
-  top padding and a taller clamp height so the message sits naturally while the
-  card occupies more of the available section.
+  clamp height, true centered alignment, larger text, and a stronger CTA so the
+  message reads clearly inside the wide card.
 - Developer-only helper copy such as the old Stage Scope card was removed from
   the visible product UI.
 

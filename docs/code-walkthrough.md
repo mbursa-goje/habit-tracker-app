@@ -342,13 +342,13 @@ The auth pages use `min-h-screen` so the split card can center vertically.
 
 `min-h-20` gives an element a minimum height from Tailwind's spacing scale.
 
-`min-h-[clamp(260px,42vh,420px)]` uses a custom CSS clamp value.
+`min-h-[clamp(300px,45vh,460px)]` uses a custom CSS clamp value.
 
 `clamp(min, preferred, max)` means:
 
-- never smaller than `260px`
-- prefer `42vh`
-- never larger than `420px`
+- never smaller than `300px`
+- prefer `45vh`
+- never larger than `460px`
 
 This keeps the empty-state card tall enough to occupy the section without
 creating a tiny card followed by a large trailing blank band.
@@ -380,7 +380,7 @@ In this project, Tailwind uses `clamp()` through arbitrary-value classes.
 Example:
 
 ```tsx
-min-h-[clamp(260px,42vh,420px)]
+min-h-[clamp(300px,45vh,460px)]
 ```
 
 `min-h-[...]` means Tailwind should generate a custom `min-height` value.
@@ -389,46 +389,41 @@ min-h-[clamp(260px,42vh,420px)]
 
 This protects the empty state from becoming too short on small screens.
 
-`42vh` is the preferred responsive value.
+`45vh` is the preferred responsive value.
 
 `vh` means viewport height.
 
-`42vh` means 42 percent of the browser height.
+`45vh` means 45 percent of the browser height.
 
 This lets the panel grow when the screen is taller.
 
-`420px` is the largest allowed minimum height.
+`460px` is the largest allowed minimum height.
 
 This prevents the empty state from becoming comically tall on large screens.
 
 So the browser chooses:
 
 ```txt
-260px <= actual min-height <= 420px
+300px <= actual min-height <= 460px
 ```
 
 while trying to stay near:
 
 ```txt
-42vh
+45vh
 ```
 
-The same idea is used for empty-state top padding:
+The empty-state card previously used `clamp()` for top padding.
 
 ```tsx
 pt-[clamp(56px,8vh,96px)]
 ```
 
-`pt-[...]` means custom padding-top.
+That was useful while testing a top-weighted layout.
 
-`56px` is the smallest top padding.
-
-`8vh` lets the top padding grow with the viewport height.
-
-`96px` stops the padding from becoming excessive.
-
-This is why the empty-state message can sit lower and feel centered on larger
-screens without becoming badly spaced on small screens.
+The final empty-state design now uses true flex centering with normal responsive
+padding instead, because the centered layout reads better in the wide dashboard
+card.
 
 `clamp()` is different from only using responsive prefixes like `sm:` or `md:`.
 
@@ -591,7 +586,7 @@ Examples from this project:
 ```tsx
 rounded-[28px]
 shadow-[0_16px_45px_rgba(37,99,235,0.08)]
-min-h-[clamp(260px,42vh,420px)]
+min-h-[clamp(300px,45vh,460px)]
 grid-cols-[minmax(0,1fr)_320px]
 tracking-[0.2em]
 ```
@@ -941,7 +936,7 @@ The dashboard also manages vertical empty space on larger screens.
 The empty state uses:
 
 ```tsx
-flex min-h-[clamp(260px,42vh,420px)] flex-col items-center justify-start
+flex min-h-[clamp(300px,45vh,460px)] flex-col items-center justify-center
 ```
 
 `flex` creates a flexible container.
@@ -950,31 +945,47 @@ flex min-h-[clamp(260px,42vh,420px)] flex-col items-center justify-start
 
 `items-center` centers the content horizontally.
 
-`justify-start` places the content from the top side of the card instead of
-forcing mathematical vertical centering.
+`justify-center` centers the empty-state content vertically.
 
-The card then uses:
+The card uses:
 
 ```tsx
-pt-[clamp(56px,8vh,96px)]
+py-12 lg:py-16
 ```
 
-`pt-[clamp(...)]` adds responsive top padding.
+`py-12` adds vertical padding on smaller screens.
 
-This gives the empty-state content a better visual center while still letting
-the card occupy more of the available section.
+`lg:py-16` increases vertical padding on larger screens.
 
-`min-h-[clamp(260px,42vh,420px)]` gives the empty state a responsive minimum
+The heading uses:
+
+```tsx
+text-2xl lg:text-3xl
+```
+
+This makes `No habits yet` readable inside the wide card.
+
+The helper text uses:
+
+```tsx
+text-base lg:text-lg
+```
+
+That keeps the explanation from looking too small on desktop.
+
+The create button reuses the stronger CTA sizing from the header create button.
+
+`min-h-[clamp(300px,45vh,460px)]` gives the empty state a responsive minimum
 height.
 
 `clamp(...)` means the height has a lower bound, a preferred viewport-relative
 size, and an upper bound.
 
-`260px` is the smallest allowed height.
+`300px` is the smallest allowed height.
 
-`42vh` lets the panel grow with the viewport.
+`45vh` lets the panel grow with the viewport.
 
-`420px` prevents the panel from becoming overly tall.
+`460px` prevents the panel from becoming overly tall.
 
 This avoids a tiny empty-state card followed by a large blank band.
 

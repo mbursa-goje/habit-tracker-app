@@ -408,19 +408,19 @@ export default function Dashboard() {
             {userHabits.length === 0 ? (
               <div
                 data-testid="empty-state"
-                className="flex min-h-[clamp(260px,42vh,420px)] flex-col items-center justify-start rounded-3xl border border-dashed border-blue-200 bg-white px-8 pb-10 pt-[clamp(56px,8vh,96px)] text-center shadow-sm"
+                className="flex min-h-[clamp(300px,45vh,460px)] flex-col items-center justify-center rounded-3xl border border-dashed border-blue-200 bg-white px-6 py-12 text-center shadow-sm sm:px-8 lg:py-16"
               >
-                <h3 className="text-xl font-bold text-slate-900">
+                <h3 className="text-2xl font-black text-slate-900 lg:text-3xl">
                   No habits yet
                 </h3>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-3 max-w-md text-base text-slate-500 lg:text-lg">
                   Create your first daily habit to start tracking progress.
                 </p>
-                <div className="group relative mt-5 inline-flex">
+                <div className="group relative mt-7 inline-flex">
                   <button
                     type="button"
                     onClick={openCreateForm}
-                    className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-200/70 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:px-6"
                   >
                     <Plus className="h-4 w-4" />
                     Create Habit
