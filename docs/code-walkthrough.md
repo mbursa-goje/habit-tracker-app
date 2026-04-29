@@ -134,6 +134,156 @@ button.
 The required `data-testid="auth-logout-button"` remains on the sidebar logout
 button.
 
+### Add And Edit Scroll Behavior
+
+The dashboard now scrolls the habit form into view when the user opens it.
+
+This applies to create actions.
+
+This also applies to edit actions.
+
+The goal is simple: if the user clicks Add or Edit from lower on the dashboard,
+the page should bring them back to the form instead of leaving them below it.
+
+This is a scrollbar behavior.
+
+It uses the browser's normal scrolling API.
+
+The implementation lives in:
+
+```txt
+src/app/dashboard/page.tsx
+```
+
+The dashboard imports:
+
+```tsx
+useRef
+```
+
+`useRef` creates a persistent reference object.
+
+The reference survives renders.
+
+Changing the reference does not cause a rerender.
+
+That makes it useful for pointing at a DOM element.
+
+The dashboard creates:
+
+```tsx
+const habitFormRegionRef = useRef<HTMLDivElement | null>(null);
+```
+
+`habitFormRegionRef` is the reference object.
+
+`HTMLDivElement` tells TypeScript the ref will point at a `div`.
+
+`null` is allowed because the form is not always rendered.
+
+When `isFormOpen` is false, the form wrapper does not exist.
+
+When `isFormOpen` is true, React attaches the `div` node to
+`habitFormRegionRef.current`.
+
+The form wrapper uses:
+
+```tsx
+<div ref={habitFormRegionRef} className="scroll-mt-6">
+```
+
+`ref={habitFormRegionRef}` connects the rendered `div` to the React ref.
+
+`scroll-mt-6` adds scroll margin at the top.
+
+That means the form does not land hard against the top edge of the viewport.
+
+The dashboard defines:
+
+```tsx
+function scrollHabitFormIntoView() {
+```
+
+This helper centralizes the scrolling behavior.
+
+Both create and edit can call the same helper.
+
+Inside it, the code calls:
+
+```tsx
+window.requestAnimationFrame(() => {
+```
+
+`requestAnimationFrame` waits until the browser is ready for the next paint.
+
+That matters because clicking Add or Edit first changes React state.
+
+React needs a moment to render the form into the DOM.
+
+Waiting for the next frame gives the ref a chance to point at the newly
+rendered form wrapper.
+
+Then the code calls:
+
+```tsx
+habitFormRegionRef.current?.scrollIntoView({
+  behavior: "smooth",
+  block: "start",
+});
+```
+
+`habitFormRegionRef.current` is the actual DOM element.
+
+The `?.` optional chaining prevents a crash if the ref is still null.
+
+`scrollIntoView` asks the browser to scroll until that element is visible.
+
+`behavior: "smooth"` makes the movement easier to follow.
+
+`block: "start"` aligns the form near the top of the viewport.
+
+The Add flow uses:
+
+```tsx
+function openCreateForm() {
+  setEditingHabit(null);
+  setIsFormOpen(true);
+  scrollHabitFormIntoView();
+}
+```
+
+`setEditingHabit(null)` clears edit mode.
+
+That tells the form it is creating a new habit.
+
+`setIsFormOpen(true)` renders the form.
+
+`scrollHabitFormIntoView()` moves the page to the form.
+
+The Edit flow uses:
+
+```tsx
+function openEditForm(habit: Habit) {
+  setEditingHabit(habit);
+  setIsFormOpen(true);
+  scrollHabitFormIntoView();
+}
+```
+
+`setEditingHabit(habit)` stores the selected habit.
+
+That selected habit is passed into `HabitForm`.
+
+`setIsFormOpen(true)` ensures the form is visible.
+
+`scrollHabitFormIntoView()` moves the user to the edit form.
+
+This does not change the TRD storage contract.
+
+This does not change create, edit, delete, or completion behavior.
+
+This is only an ergonomic improvement so users can see the form immediately.
+
 ### Dashboard Summary Ring
 
 The dashboard progress ring was enlarged because the first version felt tight.

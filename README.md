@@ -149,6 +149,8 @@ The dashboard keeps the TRD test IDs in place while adding user-facing polish:
 - Create and logout controls expose hover/focus tooltips, including the sidebar
   Add action, the top New Habit button, the empty-state Create Habit button, and
   the mobile floating create/logout buttons.
+- Add and edit actions scroll the habit form into view so the user can
+  immediately see the form they just opened.
 - Developer-only helper copy such as the old Stage Scope card was removed from
   the visible product UI.
 

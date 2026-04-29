@@ -25,6 +25,7 @@ import {
   type ReactNode,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -96,6 +97,7 @@ export default function Dashboard() {
   const session = isSession(storedSession) ? storedSession : null;
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const habitFormRegionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!hasCheckedClientStorage) {
@@ -138,14 +140,25 @@ export default function Dashboard() {
     setLocalStorageValue(STORAGE_KEYS.habits, nextHabits);
   }
 
+  function scrollHabitFormIntoView() {
+    window.requestAnimationFrame(() => {
+      habitFormRegionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }
+
   function openCreateForm() {
     setEditingHabit(null);
     setIsFormOpen(true);
+    scrollHabitFormIntoView();
   }
 
   function openEditForm(habit: Habit) {
     setEditingHabit(habit);
     setIsFormOpen(true);
+    scrollHabitFormIntoView();
   }
 
   function closeHabitForm() {
@@ -312,22 +325,24 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)]">
           <div className="space-y-5">
             {isFormOpen && (
-              <HabitForm
-                key={editingHabit?.id ?? "new-habit"}
-                habit={editingHabit ?? undefined}
-                today={today}
-                mode={editingHabit ? "edit" : "create"}
-                onSave={handleSaveHabit}
-                onDiscard={closeHabitForm}
-                onDelete={
-                  editingHabit
-                    ? () => {
-                      handleDeleteHabit(editingHabit.id);
-                      closeHabitForm();
-                    }
-                    : undefined
-                }
-              />
+              <div ref={habitFormRegionRef} className="scroll-mt-6">
+                <HabitForm
+                  key={editingHabit?.id ?? "new-habit"}
+                  habit={editingHabit ?? undefined}
+                  today={today}
+                  mode={editingHabit ? "edit" : "create"}
+                  onSave={handleSaveHabit}
+                  onDiscard={closeHabitForm}
+                  onDelete={
+                    editingHabit
+                      ? () => {
+                        handleDeleteHabit(editingHabit.id);
+                        closeHabitForm();
+                      }
+                      : undefined
+                  }
+                />
+              </div>
             )}
 
             <div className="rounded-3xl border border-blue-200 bg-white px-4 py-5 shadow-[0_18px_50px_rgba(37,99,235,0.08)] sm:px-5">
