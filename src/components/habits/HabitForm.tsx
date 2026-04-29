@@ -140,33 +140,33 @@ export default function HabitForm({
         </div>
 
         <div className="mt-8 border-t border-slate-200 pt-6">
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <button
               type="submit"
               data-testid="habit-save-button"
-              className="inline-flex items-center justify-center gap-2 rounded bg-blue-700 px-5 py-3 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-3 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
             >
               <Save className="h-4 w-4" />
-              Save Changes
+              <span className="whitespace-nowrap">Save Changes</span>
             </button>
 
             <button
               type="button"
               onClick={onDiscard}
-              className="inline-flex items-center justify-center gap-2 rounded border border-blue-700 bg-white px-5 py-3 text-sm font-bold uppercase tracking-wide text-blue-700 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-blue-700 bg-white px-4 py-3 text-xs font-bold uppercase tracking-wide text-blue-700 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
             >
               <RotateCcw className="h-4 w-4" />
-              Discard
+              <span className="whitespace-nowrap">Discard</span>
             </button>
 
             {mode === "edit" && (
               <button
                 type="button"
                 onClick={() => setIsConfirmingDelete(true)}
-                className="inline-flex items-center justify-center gap-2 rounded border border-red-500 bg-white px-5 py-3 text-sm font-bold uppercase tracking-wide text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400"
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-red-500 bg-white px-4 py-3 text-xs font-bold uppercase tracking-wide text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400 sm:col-span-2 sm:text-sm xl:col-span-1"
               >
                 <Trash2 className="h-4 w-4" />
-                Delete Habit
+                <span className="whitespace-nowrap">Delete Habit</span>
               </button>
             )}
           </div>
