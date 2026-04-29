@@ -3,6 +3,11 @@
 import HabitCard from "@/components/habits/HabitCard";
 import HabitForm, { type HabitFormValues } from "@/components/habits/HabitForm";
 import { toggleHabitCompletion } from "@/lib/habits";
+import {
+  removeLocalStorageValue,
+  setLocalStorageValue,
+  useLocalStorageValue,
+} from "@/lib/storage";
 import { calculateCurrentStreak } from "@/lib/streaks";
 import type { Session } from "@/types/auth";
 import type { Habit } from "@/types/habit";
@@ -16,6 +21,8 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+
+const EMPTY_HABITS: Habit[] = [];
 
 const navItems = [
   { name: "Today", icon: CalendarDays, active: true },
@@ -36,59 +43,41 @@ function createHabitId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function readStoredHabits(): Habit[] {
-  const habitsData = localStorage.getItem("habit-tracker-habits");
-
-  if (!habitsData) {
-    return [];
-  }
-
-  try {
-    return JSON.parse(habitsData) as Habit[];
-  } catch {
-    localStorage.setItem("habit-tracker-habits", JSON.stringify([]));
-    return [];
-  }
-}
-
-function readStoredSession(): Session | null {
-  const sessionData = localStorage.getItem("habit-tracker-session");
-
-  if (!sessionData) {
-    return null;
-  }
-
-  try {
-    const session = JSON.parse(sessionData) as Session;
-
-    if (typeof session.userId !== "string" || typeof session.email !== "string") {
-      return null;
-    }
-
-    return session;
-  } catch {
-    localStorage.removeItem("habit-tracker-session");
-    return null;
-  }
+function isSession(value: unknown): value is Session {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "userId" in value &&
+    "email" in value &&
+    typeof value.userId === "string" &&
+    typeof value.email === "string"
+  );
 }
 
 export default function Dashboard() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [habits, setHabits] = useState<Habit[]>([]);
+  const storedSession = useLocalStorageValue<unknown>(
+    "habit-tracker-session",
+    null,
+  );
+  const habits = useLocalStorageValue<Habit[]>(
+    "habit-tracker-habits",
+    EMPTY_HABITS,
+  );
+  const session = isSession(storedSession) ? storedSession : null;
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
   useEffect(() => {
-    const storedSession = readStoredSession();
-
     if (!storedSession) {
       window.location.href = "/login";
       return;
     }
 
-    setSession(storedSession);
-    setHabits(readStoredHabits());
-  }, []);
+    if (!session) {
+      removeLocalStorageValue("habit-tracker-session");
+      window.location.href = "/login";
+    }
+  }, [session, storedSession]);
 
   const today = getTodayIsoDate();
 
@@ -112,8 +101,7 @@ export default function Dashboard() {
     : 0;
 
   function saveHabits(nextHabits: Habit[]) {
-    setHabits(nextHabits);
-    localStorage.setItem("habit-tracker-habits", JSON.stringify(nextHabits));
+    setLocalStorageValue("habit-tracker-habits", nextHabits);
   }
 
   function openCreateForm() {
@@ -180,7 +168,7 @@ export default function Dashboard() {
   }
 
   function handleLogout() {
-    localStorage.removeItem("habit-tracker-session");
+    removeLocalStorageValue("habit-tracker-session");
     window.location.href = "/login";
   }
 

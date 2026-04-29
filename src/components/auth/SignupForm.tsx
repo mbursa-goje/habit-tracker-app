@@ -1,22 +1,13 @@
 "use client";
 
 import type { User } from "@/types/auth";
+import { readLocalStorageValue, setLocalStorageValue } from "@/lib/storage";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 function getStoredUsers(): User[] {
-  const usersData = localStorage.getItem("habit-tracker-users");
-
-  if (!usersData) {
-    return [];
-  }
-
-  try {
-    return JSON.parse(usersData) as User[];
-  } catch {
-    return [];
-  }
+  return readLocalStorageValue<User[]>("habit-tracker-users", []);
 }
 
 function createUserId(): string {
@@ -56,17 +47,17 @@ export default function SignupForm() {
       createdAt: new Date().toISOString(),
     };
 
-    localStorage.setItem(
+    setLocalStorageValue(
       "habit-tracker-users",
-      JSON.stringify([...users, newUser]),
+      [...users, newUser],
     );
 
-    localStorage.setItem(
+    setLocalStorageValue(
       "habit-tracker-session",
-      JSON.stringify({
+      {
         userId: newUser.id,
         email: newUser.email,
-      }),
+      },
     );
 
     window.location.href = "/dashboard";
