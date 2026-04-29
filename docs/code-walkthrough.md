@@ -1451,6 +1451,632 @@ The page remains responsible for layout and branding.
 The form component remains responsible for state, validation, persistence, and
 redirect behavior.
 
+## `src/components/habits/HabitForm.tsx`
+
+Purpose: render the TRD create/edit habit form.
+
+The form supports both create and edit mode through an optional `habit` prop.
+
+It does not store extra fields outside the TRD shape.
+
+It only saves `name`, `description`, and `frequency: "daily"`.
+
+```tsx
+"use client";
+```
+
+The component uses `useState`, `useEffect`, and form event handlers.
+
+Those are client-side React features.
+
+The directive tells Next.js this file must run in the browser.
+
+```tsx
+import type { Habit } from "@/types/habit";
+```
+
+This imports the TRD `Habit` type.
+
+The type is used for the optional `habit` being edited.
+
+```tsx
+import { validateHabitName } from "@/lib/validators";
+```
+
+This imports the required validator helper.
+
+Using the helper keeps the form aligned with the exact TRD validation
+messages.
+
+```tsx
+export type HabitFormValues = {
+  name: string;
+  description: string;
+  frequency: "daily";
+};
+```
+
+This type describes the values the form sends upward.
+
+`name` maps to `habit.name`.
+
+`description` maps to `habit.description`.
+
+`frequency` is locked to `"daily"`.
+
+The form does not send `id`, `userId`, `createdAt`, or `completions`.
+
+Those fields are owned by the dashboard logic.
+
+That separation matters because edit behavior must preserve immutable fields.
+
+```tsx
+type HabitFormProps = {
+  habit?: Habit | null;
+  onSave: (values: HabitFormValues) => void;
+  onCancel: () => void;
+};
+```
+
+`habit` is present when editing and missing when creating.
+
+`onSave` lets the parent decide whether to create or update.
+
+`onCancel` closes the form without saving.
+
+```tsx
+const [name, setName] = useState(habit?.name ?? "");
+```
+
+When editing, the input starts with the habit name.
+
+When creating, it starts empty.
+
+`?? ""` prevents uncontrolled input warnings.
+
+```tsx
+const [description, setDescription] = useState(habit?.description ?? "");
+```
+
+The description works the same way as name.
+
+The TRD says description is optional, but it is still stored as a string.
+
+```tsx
+const [error, setError] = useState<string | null>(null);
+```
+
+The form stores one validation error at a time.
+
+`null` means no visible error.
+
+```tsx
+useEffect(() => {
+  setName(habit?.name ?? "");
+  setDescription(habit?.description ?? "");
+  setError(null);
+}, [habit]);
+```
+
+This effect resets the form whenever the selected habit changes.
+
+If the user edits Habit A, closes it, then edits Habit B, the fields update.
+
+The error is cleared so old validation messages do not leak into the new form.
+
+```tsx
+function handleSubmit(event: FormEvent<HTMLFormElement>) {
+```
+
+This handles form submission.
+
+The type says the event comes from an HTML form.
+
+```tsx
+event.preventDefault();
+```
+
+This stops the browser from doing a full page reload.
+
+React and localStorage handle the save.
+
+```tsx
+const result = validateHabitName(name);
+```
+
+The raw name goes through the TRD validator.
+
+The validator trims the value and checks empty/length rules.
+
+```tsx
+if (!result.valid) {
+  setError(result.error);
+  return;
+}
+```
+
+Invalid names stop the save.
+
+The exact validator message is shown.
+
+```tsx
+onSave({
+  name: result.value,
+  description: description.trim(),
+  frequency: "daily",
+});
+```
+
+The form sends normalized values to the parent.
+
+`result.value` is the trimmed habit name.
+
+`description.trim()` removes accidental outer spaces.
+
+`frequency` is always `"daily"` because weekly is outside the TRD stage.
+
+```tsx
+data-testid="habit-form"
+```
+
+This marks the form for tests.
+
+```tsx
+data-testid="habit-name-input"
+```
+
+This marks the habit name input for tests.
+
+```tsx
+data-testid="habit-description-input"
+```
+
+This marks the description textarea for tests.
+
+```tsx
+data-testid="habit-frequency-select"
+```
+
+This marks the frequency select for tests.
+
+The select only contains `Daily`.
+
+```tsx
+data-testid="habit-save-button"
+```
+
+This marks the save button for tests.
+
+## `src/components/habits/HabitCard.tsx`
+
+Purpose: render one habit and expose the required habit action test IDs.
+
+```tsx
+const slug = getHabitSlug(habit.name);
+```
+
+The slug is derived from the habit name.
+
+If the habit is `Drink Water`, the slug is `drink-water`.
+
+The slug is used to build deterministic test IDs.
+
+```tsx
+const isCompletedToday = habit.completions.includes(today);
+```
+
+This checks whether today's `YYYY-MM-DD` date exists in `completions`.
+
+If it exists, the habit is complete for today.
+
+If it does not exist, the habit is incomplete for today.
+
+```tsx
+const streak = calculateCurrentStreak(habit.completions, today);
+```
+
+This calculates the visible current streak.
+
+The helper returns zero if today is not completed.
+
+The helper counts backward from today while dates are consecutive.
+
+```tsx
+const completionRate = Math.min(
+  100,
+  Math.round((new Set(habit.completions).size / 30) * 100),
+);
+```
+
+This creates a simple recent performance percentage for the visual card.
+
+`new Set(...)` removes duplicate dates.
+
+The rate compares unique completions against 30 days.
+
+`Math.min(100, ...)` prevents values over 100%.
+
+This value is derived from `completions`.
+
+It is not persisted as a new field.
+
+```tsx
+data-testid={`habit-card-${slug}`}
+```
+
+This satisfies the TRD habit card test ID requirement.
+
+```tsx
+data-testid={`habit-edit-${slug}`}
+```
+
+This marks the edit button for the habit.
+
+Clicking it calls the parent `onEdit`.
+
+The dashboard then opens `HabitForm` with this habit.
+
+```tsx
+data-testid={`habit-delete-${slug}`}
+```
+
+This marks the delete button for the habit.
+
+Clicking it does not delete immediately.
+
+It opens a confirmation panel.
+
+This satisfies the TRD rule that deletion requires explicit confirmation.
+
+```tsx
+data-testid={`habit-streak-${slug}`}
+```
+
+This marks the visible streak display for tests.
+
+```tsx
+data-testid={`habit-complete-${slug}`}
+```
+
+This marks the completion toggle button.
+
+Clicking it toggles today's date only.
+
+```tsx
+aria-pressed={isCompletedToday}
+```
+
+This makes the completion state accessible.
+
+Assistive technologies can tell whether the toggle is active.
+
+```tsx
+data-testid="confirm-delete-button"
+```
+
+This marks the final destructive confirmation button.
+
+The test ID is not slugged because the TRD requires this exact value.
+
+The button only appears after the first delete button is clicked.
+
+## `src/app/dashboard/page.tsx`
+
+Purpose: implement the protected dashboard and local habit behavior.
+
+```tsx
+import HabitCard from "@/components/habits/HabitCard";
+import HabitForm, { type HabitFormValues } from "@/components/habits/HabitForm";
+```
+
+The dashboard renders habit cards and the create/edit form.
+
+`HabitFormValues` types the object received from the form on save.
+
+```tsx
+import { toggleHabitCompletion } from "@/lib/habits";
+```
+
+This imports the TRD completion toggle helper.
+
+Using it keeps duplicate prevention and immutability centralized.
+
+```tsx
+import { calculateCurrentStreak } from "@/lib/streaks";
+```
+
+The dashboard uses this to calculate the best streak summary.
+
+Each card also calculates its own streak.
+
+```tsx
+function getTodayIsoDate() {
+  return new Date().toISOString().split("T")[0];
+}
+```
+
+This returns today's date in `YYYY-MM-DD` format.
+
+That is the date format required by the TRD for `completions`.
+
+```tsx
+function createHabitId(): string {
+```
+
+This creates a unique id for new habits.
+
+The TRD requires habit IDs to be unique strings.
+
+```tsx
+function readStoredHabits(): Habit[] {
+```
+
+This reads `habit-tracker-habits`.
+
+If the key is missing, it returns an empty array.
+
+If the stored JSON is broken, it resets the key to `[]`.
+
+This prevents the dashboard from crashing on bad localStorage data.
+
+```tsx
+function readStoredSession(): Session | null {
+```
+
+This reads `habit-tracker-session`.
+
+If no valid session exists, it returns `null`.
+
+The dashboard uses `null` to redirect to `/login`.
+
+```tsx
+const [session, setSession] = useState<Session | null>(null);
+```
+
+`session` stores the logged-in user session.
+
+It starts as `null` until localStorage is read.
+
+```tsx
+const [habits, setHabits] = useState<Habit[]>([]);
+```
+
+`habits` stores all habits from localStorage.
+
+This includes habits for all users.
+
+Filtering happens separately.
+
+```tsx
+const [isFormOpen, setIsFormOpen] = useState(false);
+```
+
+This decides whether `HabitForm` is visible.
+
+```tsx
+const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+```
+
+`editingHabit` is `null` when creating a new habit.
+
+It contains a habit object when editing.
+
+```tsx
+useEffect(() => {
+  const storedSession = readStoredSession();
+```
+
+The dashboard reads the session after the browser renders.
+
+This must happen client-side because localStorage is browser-only.
+
+```tsx
+if (!storedSession) {
+  window.location.href = "/login";
+  return;
+}
+```
+
+This protects `/dashboard`.
+
+Unauthenticated users are redirected to `/login`.
+
+```tsx
+setSession(storedSession);
+setHabits(readStoredHabits());
+```
+
+Once authenticated, the dashboard stores the session and loads habits.
+
+```tsx
+const userHabits = useMemo(
+  () => habits.filter((habit) => habit.userId === session?.userId),
+  [habits, session?.userId],
+);
+```
+
+This filters all stored habits down to the logged-in user's habits.
+
+This satisfies the TRD rule that dashboard only renders the active user's
+habits.
+
+`useMemo` avoids recalculating unless habits or session user changes.
+
+```tsx
+const activeCount = userHabits.length;
+```
+
+This is the number of habits owned by the active user.
+
+```tsx
+const doneTodayCount = userHabits.filter((habit) =>
+  habit.completions.includes(today),
+).length;
+```
+
+This counts how many user habits are completed today.
+
+```tsx
+const progressPercent =
+  activeCount === 0 ? 0 : Math.round((doneTodayCount / activeCount) * 100);
+```
+
+This calculates dashboard progress.
+
+If there are no habits, progress is zero.
+
+The zero guard prevents division by zero.
+
+```tsx
+const bestStreak = userHabits.length
+  ? Math.max(...userHabits.map(...))
+  : 0;
+```
+
+This calculates the best current streak across the user's habits.
+
+If there are no habits, the best streak is zero.
+
+```tsx
+function saveHabits(nextHabits: Habit[]) {
+  setHabits(nextHabits);
+  localStorage.setItem("habit-tracker-habits", JSON.stringify(nextHabits));
+}
+```
+
+This is the central save function.
+
+It updates React state.
+
+It writes the same data to localStorage.
+
+Every create, edit, delete, and toggle goes through this function.
+
+```tsx
+function openCreateForm() {
+  setEditingHabit(null);
+  setIsFormOpen(true);
+}
+```
+
+This opens the form in create mode.
+
+`editingHabit` is cleared so the form starts empty.
+
+```tsx
+function openEditForm(habit: Habit) {
+  setEditingHabit(habit);
+  setIsFormOpen(true);
+}
+```
+
+This opens the form in edit mode.
+
+The selected habit is passed into `HabitForm`.
+
+```tsx
+function handleSaveHabit(values: HabitFormValues) {
+```
+
+This receives normalized form values.
+
+It decides whether to create or edit based on `editingHabit`.
+
+```tsx
+if (editingHabit) {
+  const nextHabits = habits.map((habit) =>
+    habit.id === editingHabit.id
+      ? { ...habit, name: values.name, description: values.description, frequency: "daily" }
+      : habit,
+  );
+```
+
+Edit mode updates only the editable fields.
+
+`id` is preserved.
+
+`userId` is preserved.
+
+`createdAt` is preserved.
+
+`completions` is preserved.
+
+This satisfies the TRD edit rules.
+
+```tsx
+const newHabit: Habit = {
+  id: createHabitId(),
+  userId: session.userId,
+  name: values.name,
+  description: values.description,
+  frequency: "daily",
+  createdAt: new Date().toISOString(),
+  completions: [],
+};
+```
+
+Create mode builds a complete TRD habit object.
+
+The habit belongs to the active session user.
+
+Frequency is always daily.
+
+New habits start with no completions.
+
+```tsx
+function handleDeleteHabit(habitId: string) {
+  saveHabits(habits.filter((habit) => habit.id !== habitId));
+}
+```
+
+This removes a habit from localStorage and state.
+
+It only runs after the card confirmation button is clicked.
+
+```tsx
+function handleToggleHabit(habitId: string) {
+  saveHabits(
+    habits.map((habit) =>
+      habit.id === habitId ? toggleHabitCompletion(habit, today) : habit,
+    ),
+  );
+}
+```
+
+This toggles today's completion for one habit.
+
+Other habits remain unchanged.
+
+The helper prevents duplicate dates and avoids mutation.
+
+```tsx
+data-testid="dashboard-page"
+```
+
+This marks the protected dashboard container for tests.
+
+```tsx
+data-testid="create-habit-button"
+```
+
+This marks the primary create habit button.
+
+```tsx
+data-testid="empty-state"
+```
+
+This appears only when the active user has no habits.
+
+The TRD requires this empty state marker.
+
+```tsx
+data-testid="auth-logout-button"
+```
+
+This marks the logout control.
+
+Logout removes the session and redirects to `/login`.
+
 ## Current Remaining Work
 
 ## `src/components/shared/SplashScreen.tsx`
