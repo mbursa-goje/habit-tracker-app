@@ -64,10 +64,19 @@ export default function Dashboard() {
     EMPTY_HABITS,
   );
   const session = isSession(storedSession) ? storedSession : null;
+  const [hasCheckedClientStorage, setHasCheckedClientStorage] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
   useEffect(() => {
+    setHasCheckedClientStorage(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasCheckedClientStorage) {
+      return;
+    }
+
     if (!storedSession) {
       window.location.href = "/login";
       return;
@@ -77,7 +86,7 @@ export default function Dashboard() {
       removeLocalStorageValue("habit-tracker-session");
       window.location.href = "/login";
     }
-  }, [session, storedSession]);
+  }, [hasCheckedClientStorage, session, storedSession]);
 
   const today = getTodayIsoDate();
 
@@ -172,7 +181,7 @@ export default function Dashboard() {
     window.location.href = "/login";
   }
 
-  if (!session) {
+  if (!hasCheckedClientStorage || !session) {
     return <div className="p-8 text-slate-500">Loading...</div>;
   }
 
