@@ -151,6 +151,9 @@ The dashboard keeps the TRD test IDs in place while adding user-facing polish:
   visible labels instead of redundant tooltips.
 - Add and edit actions scroll the habit form into view so the user can
   immediately see the form they just opened.
+- Create/edit mode uses the full dashboard width on larger screens, and the
+  habit form performance summary fills the remaining right-side space instead
+  of leaving a short panel with unused space beside it.
 - Developer-only helper copy such as the old Stage Scope card was removed from
   the visible product UI.
 

@@ -63,7 +63,7 @@ export default function HabitForm({
   }
 
   return (
-    <div className="grid gap-5 2xl:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
       <form
         data-testid="habit-form"
         onSubmit={handleSubmit}

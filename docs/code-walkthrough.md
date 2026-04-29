@@ -290,6 +290,74 @@ This does not change create, edit, delete, or completion behavior.
 
 This is only an ergonomic improvement so users can see the form immediately.
 
+### Full-Width Form Mode
+
+The dashboard now changes layout when the habit form is open.
+
+This applies to create mode.
+
+This also applies to edit mode.
+
+The goal is to avoid a narrow form area on larger screens.
+
+When the form is closed, the dashboard uses the normal dashboard layout:
+
+```tsx
+xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)]
+```
+
+That creates a main content column and a right rail.
+
+The right rail contains dashboard-level cards such as Daily Insight, Weekly
+Consistency, and Next Up.
+
+When the form is open, the dashboard does not apply that `xl` two-column class.
+
+The section stays:
+
+```tsx
+grid grid-cols-1 gap-5
+```
+
+That makes the form area occupy the full available dashboard width.
+
+The right rail also receives:
+
+```tsx
+xl:hidden
+```
+
+while the form is open.
+
+That prevents dashboard-level cards from competing with the create/edit form
+for horizontal space.
+
+The form itself already has its own performance summary panel.
+
+That means the user still sees habit-specific performance context while
+creating or editing.
+
+The `HabitForm` root grid now uses:
+
+```tsx
+xl:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]
+```
+
+`xl:grid-cols-[...]` activates the two-column form layout on large screens.
+
+`minmax(0,1fr)` gives the form fields the flexible main column.
+
+`minmax(320px,420px)` gives the performance summary a useful right column.
+
+The summary column can grow up to `420px`.
+
+The summary column does not stay as a short, isolated panel in the left side of
+the dashboard.
+
+This layout uses available desktop width more intentionally.
+
+It also keeps mobile simple because the base layout is still one column.
+
 ### Dashboard Summary Ring
 
 The dashboard progress ring was enlarged because the first version felt tight.

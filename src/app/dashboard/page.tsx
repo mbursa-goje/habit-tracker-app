@@ -313,7 +313,12 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)]">
+        <section
+          className={`grid grid-cols-1 gap-5 ${isFormOpen
+            ? ""
+            : "xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)]"
+            }`}
+        >
           <div className="space-y-5">
             {isFormOpen && (
               <div ref={habitFormRegionRef} className="scroll-mt-6">
@@ -433,7 +438,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          <aside className="space-y-5">
+          <aside className={`space-y-5 ${isFormOpen ? "xl:hidden" : ""}`}>
             <div className="overflow-hidden rounded-3xl border border-blue-100 bg-slate-900 p-5 text-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
               <div className="rounded-2xl bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.35),_rgba(15,23,42,0.85)_65%)] p-5">
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-blue-200">
