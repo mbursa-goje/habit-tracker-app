@@ -408,7 +408,7 @@ export default function Dashboard() {
             {userHabits.length === 0 ? (
               <div
                 data-testid="empty-state"
-                className="flex min-h-[clamp(220px,34vh,360px)] flex-col items-center justify-center rounded-3xl border border-dashed border-blue-200 bg-white p-8 text-center shadow-sm"
+                className="flex min-h-[clamp(260px,42vh,420px)] flex-col items-center justify-start rounded-3xl border border-dashed border-blue-200 bg-white px-8 pb-10 pt-[clamp(56px,8vh,96px)] text-center shadow-sm"
               >
                 <h3 className="text-xl font-bold text-slate-900">
                   No habits yet
