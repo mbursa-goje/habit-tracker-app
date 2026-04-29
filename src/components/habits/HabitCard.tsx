@@ -78,8 +78,8 @@ export default function HabitCard({
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col gap-5 2xl:flex-row 2xl:items-center 2xl:justify-between">
-          <div className="flex min-w-0 items-center gap-4">
+        <div className="mt-8 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
             <div className="flex shrink-0 -space-x-2">
               <span className="h-10 w-4 rounded-full bg-blue-100" />
               <span className="h-10 w-4 rounded-full bg-blue-200" />
@@ -101,7 +101,7 @@ export default function HabitCard({
             type="button"
             data-testid={`habit-complete-${slug}`}
             onClick={onToggleComplete}
-            className={`inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full px-6 py-3.5 text-lg font-semibold text-white shadow-[0_12px_24px_rgba(29,78,216,0.18)] transition focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-7 sm:py-4 sm:text-xl 2xl:w-auto 2xl:min-w-48 ${isCompletedToday
+            className={`inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full px-6 py-3.5 text-lg font-semibold text-white shadow-[0_12px_24px_rgba(29,78,216,0.18)] transition focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-7 sm:py-4 sm:text-xl md:w-auto md:min-w-48 ${isCompletedToday
               ? "bg-emerald-600 hover:bg-emerald-700"
               : "bg-blue-700 hover:bg-blue-800"
               }`}

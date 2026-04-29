@@ -182,6 +182,80 @@ wide screens.
 
 That keeps `Complete` and `Completed` readable.
 
+The habit list now waits until the `2xl` breakpoint before splitting into two
+columns.
+
+This matters on Nest Hub Max style widths.
+
+At that size, the dashboard already has a right rail.
+
+If the habit list also split into two columns at `xl`, each card became too
+narrow.
+
+The card then looked cramped even though the button itself was technically
+working.
+
+`HabitList` therefore uses:
+
+```tsx
+grid grid-cols-1 gap-5 2xl:grid-cols-2
+```
+
+`grid` creates the card layout.
+
+`grid-cols-1` keeps one full-width habit card by default.
+
+`gap-5` keeps consistent space between habit cards.
+
+`2xl:grid-cols-2` allows two columns only on very wide screens.
+
+That gives each habit card enough horizontal room on medium-large dashboards.
+
+Inside `HabitCard`, the Daily Discipline row uses:
+
+```tsx
+flex flex-col gap-5 md:flex-row md:items-center md:justify-between
+```
+
+`flex` creates a flexible row/column container.
+
+`flex-col` stacks the discipline text and Complete button on small screens.
+
+`gap-5` keeps space between the stacked pieces.
+
+`md:flex-row` changes the layout back to a row once there is enough width.
+
+That places the Complete button beside the Daily Discipline text.
+
+`md:items-center` vertically aligns the text block and button.
+
+`md:justify-between` pushes the text block to the left and the Complete button
+to the right.
+
+The text block uses:
+
+```tsx
+flex min-w-0 flex-1 items-center gap-4
+```
+
+`flex-1` lets the text side occupy the remaining width.
+
+`min-w-0` allows long descriptions to wrap instead of forcing overflow.
+
+The Complete button uses:
+
+```tsx
+w-full md:w-auto md:min-w-48
+```
+
+`w-full` makes the button easy to tap on small screens.
+
+`md:w-auto` lets the button shrink to its content on wider screens.
+
+`md:min-w-48` keeps the button wide enough for icon and label.
+
+This combination keeps mobile stacked and desktop aligned.
+
 The delete confirmation controls use a grid on smaller widths.
 
 That prevents `Cancel` and `Confirm Delete` from colliding.
