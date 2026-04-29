@@ -242,24 +242,6 @@ export default function HabitForm({
             </p>
           </div>
         </section>
-
-        <section className="rounded-lg border border-slate-200 bg-white p-5">
-          <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
-            Stage Scope
-          </h3>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded bg-slate-100 px-3 py-2 text-sm font-semibold uppercase text-slate-600">
-              Daily Only
-            </span>
-            <span className="rounded bg-slate-100 px-3 py-2 text-sm font-semibold uppercase text-slate-600">
-              Local Storage
-            </span>
-            <span className="rounded bg-slate-100 px-3 py-2 text-sm font-semibold uppercase text-slate-600">
-              TRD Safe
-            </span>
-          </div>
-        </section>
       </aside>
     </div>
   );
