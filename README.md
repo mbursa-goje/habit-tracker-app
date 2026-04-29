@@ -143,7 +143,9 @@ the shared `toggleHabitCompletion` helper.
 The dashboard keeps the TRD test IDs in place while adding user-facing polish:
 
 - The summary panel uses a blue progress ring, compact metric tiles, and a
-  softened blue border.
+  softened blue border. On narrow screens, the ring cell centers the circle and
+  lets it grow to the available grid width so the 320px layout does not leave
+  awkward trailing space beside the percentage.
 - Habit cards keep action areas responsive so edit, delete, completion, cancel,
   and confirmation controls do not become cramped on wider dashboard columns.
 - Icon-only mobile create/logout controls expose hover/focus tooltips. Text

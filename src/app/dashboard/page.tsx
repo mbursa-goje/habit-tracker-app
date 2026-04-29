@@ -341,11 +341,11 @@ export default function Dashboard() {
               </div>
             )}
 
-            <div className="rounded-3xl border border-blue-200 bg-white px-4 py-5 shadow-[0_18px_50px_rgba(37,99,235,0.08)] sm:px-5">
-              <div className="grid grid-cols-2 items-center gap-4 md:grid-cols-[auto_repeat(3,minmax(0,1fr))] md:gap-6">
-                <div className="flex items-center gap-4 md:col-span-1 md:justify-start">
+            <div className="rounded-3xl border border-blue-200 bg-white px-3 py-4 shadow-[0_18px_50px_rgba(37,99,235,0.08)] sm:px-5 sm:py-5">
+              <div className="grid grid-cols-2 items-stretch gap-3 md:grid-cols-[auto_repeat(3,minmax(0,1fr))] md:items-center md:gap-6">
+                <div className="flex min-h-24 items-center justify-center md:col-span-1 md:justify-start">
                   <div
-                    className="grid h-24 w-24 place-items-center rounded-full p-1.5 sm:h-28 sm:w-28 sm:p-2"
+                    className="grid aspect-square w-full max-w-28 place-items-center rounded-full p-1.5 sm:p-2"
                     style={{
                       background: `conic-gradient(#1d4ed8 ${progressPercent * 3.6
                         }deg, #e2e8f0 0deg)`,
@@ -364,7 +364,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="flex min-h-20 flex-col items-center justify-center rounded-2xl border border-blue-50 bg-blue-50/40 p-3 text-center sm:p-4">
+                <div className="flex min-h-24 w-full flex-col items-center justify-center rounded-2xl border border-blue-50 bg-blue-50/40 p-3 text-center sm:p-4">
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Completed
                   </p>
@@ -373,7 +373,7 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div className="flex min-h-20 flex-col items-center justify-center rounded-2xl border border-blue-50 bg-blue-50/40 p-3 text-center sm:p-4">
+                <div className="flex min-h-24 w-full flex-col items-center justify-center rounded-2xl border border-blue-50 bg-blue-50/40 p-3 text-center sm:p-4">
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Active
                   </p>
@@ -382,7 +382,7 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div className="flex min-h-20 flex-col items-center justify-center rounded-2xl border border-blue-50 bg-blue-50/40 p-3 text-center sm:p-4">
+                <div className="flex min-h-24 w-full flex-col items-center justify-center rounded-2xl border border-blue-50 bg-blue-50/40 p-3 text-center sm:p-4">
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Best Streak
                   </p>

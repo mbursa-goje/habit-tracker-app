@@ -890,8 +890,12 @@ taller than the right rail cards.
 The dashboard summary metric tiles use:
 
 ```tsx
-flex min-h-20 flex-col items-center justify-center text-center
+flex min-h-24 w-full flex-col items-center justify-center text-center
 ```
+
+`min-h-24` gives each metric tile enough vertical room on narrow screens.
+
+`w-full` makes each tile occupy the full width of its grid cell.
 
 `items-center` centers the label/value stack horizontally.
 
@@ -920,7 +924,28 @@ and left a blank right-side area in create/edit mode.
 
 The dashboard progress ring was enlarged because the first version felt tight.
 
-The outer ring now uses a larger fixed size.
+The outer ring now uses:
+
+```tsx
+aspect-square w-full max-w-28
+```
+
+`aspect-square` keeps the ring perfectly circular.
+
+`w-full` lets the ring grow to the available width of its grid cell.
+
+`max-w-28` prevents the ring from becoming too large.
+
+The ring wrapper uses:
+
+```tsx
+justify-center
+```
+
+This centers the ring inside its mobile grid cell.
+
+That removes the trailing side space that appeared beside the percentage on
+small screens around 320px wide.
 
 The inner white circle fills the remaining space.
 
