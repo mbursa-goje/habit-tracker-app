@@ -202,47 +202,45 @@ export default function HabitForm({
       </form>
 
       <aside className="h-full">
-        <section className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-5 lg:p-7">
+        <section className="flex h-full min-h-[clamp(520px,68vh,720px)] flex-col rounded-lg border border-slate-200 bg-white p-5 lg:p-7">
           <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
             Performance Summary
           </h3>
 
-          <div className="flex flex-1 flex-col justify-center gap-8 py-8">
-            <div className="rounded-xl bg-blue-50 p-5 lg:p-6">
-              <div className="flex items-center gap-4">
-                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-emerald-300 text-emerald-900 lg:h-16 lg:w-16">
-                  <Flame className="h-7 w-7 lg:h-8 lg:w-8" />
+          <div className="flex flex-1 flex-col items-center justify-center gap-10 py-10 text-center">
+            <div className="w-full max-w-xs rounded-2xl bg-blue-50 p-6 lg:p-7">
+              <div className="flex flex-col items-center gap-4">
+                <div className="grid h-[4.5rem] w-[4.5rem] shrink-0 place-items-center rounded-2xl bg-emerald-300 text-emerald-900 lg:h-20 lg:w-20">
+                  <Flame className="h-9 w-9 lg:h-10 lg:w-10" />
                 </div>
 
                 <div>
-                  <p className="text-base font-semibold text-slate-500">
+                  <p className="text-base font-semibold text-slate-500 lg:text-lg">
                     Current Streak
                   </p>
-                  <p className="text-2xl font-bold text-slate-950 lg:text-3xl">
+                  <p className="mt-1 text-3xl font-black text-slate-950 lg:text-4xl">
                     {streak} Days
                   </p>
                 </div>
               </div>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-base font-semibold text-slate-950">
-                  Completion Rate
-                </p>
-                <p className="text-lg font-bold text-blue-700">
-                  {completionRate}%
-                </p>
-              </div>
+            <div className="w-full max-w-xs">
+              <p className="text-lg font-bold text-slate-950 lg:text-xl">
+                Completion Rate
+              </p>
+              <p className="mt-1 text-3xl font-black text-blue-700 lg:text-4xl">
+                {completionRate}%
+              </p>
 
-              <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-blue-50">
+              <div className="mt-5 h-3.5 w-full overflow-hidden rounded-full bg-blue-50">
                 <div
                   className="h-full rounded-full bg-blue-700"
                   style={{ width: `${completionRate}%` }}
                 />
               </div>
 
-              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Last 30 days performance
               </p>
             </div>

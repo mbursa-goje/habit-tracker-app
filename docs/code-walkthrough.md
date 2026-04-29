@@ -1030,10 +1030,19 @@ The habit form performance summary uses:
 
 ```tsx
 aside className="h-full"
-section className="flex h-full flex-col ..."
+section className="flex h-full min-h-[clamp(520px,68vh,720px)] flex-col ..."
 ```
 
 `h-full` lets the summary column match the form column height.
+
+`min-h-[clamp(520px,68vh,720px)]` gives the summary card its own responsive
+minimum height.
+
+`520px` keeps the card tall enough for large-screen dashboard layouts.
+
+`68vh` lets it respond to the viewport height.
+
+`720px` prevents the panel from stretching too far.
 
 The section itself fills that column.
 
@@ -1043,7 +1052,7 @@ and left a blank right-side area in create/edit mode.
 Inside the summary section, the performance content uses:
 
 ```tsx
-flex flex-1 flex-col justify-center gap-8 py-8
+flex flex-1 flex-col items-center justify-center gap-10 py-10 text-center
 ```
 
 `flex-1` lets the content area occupy the remaining height below the
@@ -1051,17 +1060,28 @@ flex flex-1 flex-col justify-center gap-8 py-8
 
 `flex-col` stacks the streak block and completion block vertically.
 
+`items-center` centers the blocks horizontally.
+
 `justify-center` centers those blocks inside the available height.
 
-`gap-8` creates stronger vertical rhythm between the streak block and the
+`gap-10` creates stronger vertical rhythm between the streak block and the
 completion meter.
 
-`py-8` adds top and bottom breathing room so the centered content does not touch
+`py-10` adds top and bottom breathing room so the centered content does not touch
 the panel edges.
 
-The streak tile uses larger icon and text sizes on large screens.
+`text-center` makes the metric labels and values align with the centered layout.
 
-The completion bar uses a taller `h-3` track.
+The streak tile uses a `max-w-xs` width so it stays readable in a narrow right
+panel.
+
+The streak icon uses `h-[4.5rem] w-[4.5rem]` and grows to `lg:h-20 lg:w-20`.
+
+The streak value uses `text-3xl` and grows to `lg:text-4xl`.
+
+The completion value also uses `text-3xl` and grows to `lg:text-4xl`.
+
+The completion bar uses a taller `h-3.5` track.
 
 Those size changes make the summary feel intentional in a tall desktop column
 instead of looking like small content stuck at the top of an empty panel.
