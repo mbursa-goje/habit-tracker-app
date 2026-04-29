@@ -297,7 +297,7 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 items-center gap-4 md:grid-cols-[auto_repeat(3,minmax(0,1fr))] md:gap-6">
                 <div className="flex items-center gap-4 md:col-span-1 md:justify-start">
                   <div
-                    className="grid h-20 w-20 place-items-center rounded-full p-[0.35rem] sm:h-24 sm:w-24"
+                    className="grid h-24 w-24 place-items-center rounded-full p-1.5 sm:h-28 sm:w-28 sm:p-2"
                     style={{
                       background: `conic-gradient(#1d4ed8 ${progressPercent * 3.6
                         }deg, #e2e8f0 0deg)`,
@@ -305,10 +305,10 @@ export default function Dashboard() {
                   >
                     <div className="grid h-full w-full place-items-center rounded-full bg-white shadow-inner">
                       <div className="text-center">
-                        <p className="text-xl font-black text-slate-800 sm:text-2xl">
+                        <p className="text-2xl font-black leading-none text-slate-800 sm:text-3xl">
                           {progressPercent}%
                         </p>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 sm:text-[10px]">
+                        <p className="mt-1 text-[9px] font-bold uppercase leading-none tracking-[0.2em] text-slate-500 sm:text-[10px]">
                           Daily Goal
                         </p>
                       </div>
