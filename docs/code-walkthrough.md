@@ -3228,6 +3228,831 @@ That proves the UI updates immediately after toggling completion.
 It also proves the card uses the shared streak helper instead of hardcoded
 streak text.
 
+## Playwright E2E Tests
+
+Purpose: verify the complete app contract in a real browser.
+
+Unit tests verify pure helper functions.
+
+Integration tests verify React components in jsdom.
+
+Playwright E2E tests verify route navigation, browser localStorage,
+redirects, reload behavior, and offline service worker behavior.
+
+The TRD requires the file:
+
+```txt
+tests/e2e/app.spec.ts
+```
+
+The TRD requires the describe block:
+
+```ts
+test.describe("Habit Tracker app", () => {})
+```
+
+Every test title in the file must match the TRD wording exactly.
+
+Mentors may scan test output for those exact titles.
+
+### `playwright.config.ts`
+
+Purpose: make `npm run test:e2e` start the app and run browser tests.
+
+```ts
+import { defineConfig, devices } from "@playwright/test";
+```
+
+`defineConfig` gives typed Playwright configuration.
+
+`devices` provides built-in browser/device presets.
+
+```ts
+export default defineConfig({
+```
+
+This exports the Playwright configuration object.
+
+The `playwright test` command reads this file automatically.
+
+```ts
+testDir: "./tests/e2e",
+```
+
+This tells Playwright where E2E specs live.
+
+It keeps E2E tests separate from unit and integration tests.
+
+```ts
+timeout: 30_000,
+```
+
+Each test can run for up to 30 seconds.
+
+The underscore is numeric separator syntax.
+
+`30_000` is the same number as `30000`.
+
+It is easier to read as milliseconds.
+
+```ts
+expect: {
+  timeout: 7_500,
+},
+```
+
+Playwright assertions auto-wait.
+
+This gives each `expect(...)` up to 7.5 seconds.
+
+That matters for route redirects and hydration.
+
+```ts
+use: {
+  baseURL: "http://localhost:3000",
+  trace: "on-first-retry",
+},
+```
+
+`baseURL` lets tests call `page.goto("/login")` instead of the full URL.
+
+`localhost` is used instead of `127.0.0.1`.
+
+Next dev treats these as different origins.
+
+Using `127.0.0.1` caused Next dev resources to be blocked as cross-origin.
+
+`trace: "on-first-retry"` records debugging traces only when a test retries.
+
+That keeps normal test runs lighter.
+
+```ts
+webServer: {
+  command: "npm run dev",
+  url: "http://localhost:3000",
+  reuseExistingServer: !process.env.CI,
+  timeout: 120_000,
+},
+```
+
+`webServer` lets Playwright start the Next dev server automatically.
+
+`command` runs the same dev script developers use locally.
+
+`url` tells Playwright when the app is ready.
+
+`reuseExistingServer` avoids starting a second dev server locally if one is
+already running.
+
+CI should normally start a fresh server, so reuse is disabled there.
+
+`timeout` gives Next enough time to compile before tests begin.
+
+```ts
+projects: [
+  {
+    name: "chromium",
+    use: { ...devices["Desktop Chrome"] },
+  },
+],
+```
+
+The TRD requires Playwright, not every browser engine.
+
+One Chromium project is enough for this stage.
+
+`Desktop Chrome` gives the tests a desktop viewport.
+
+That keeps the sidebar logout button visible in dashboard tests.
+
+### `public/manifest.json`
+
+Purpose: satisfy the installable PWA manifest contract.
+
+```json
+"name": "Habit Tracker"
+```
+
+This is the full app name.
+
+The TRD requires the manifest to include `name`.
+
+```json
+"short_name": "Habits"
+```
+
+This is the shorter display name for constrained install surfaces.
+
+The TRD requires `short_name`.
+
+```json
+"start_url": "/"
+```
+
+An installed PWA opens at the root route.
+
+The root route then applies the TRD splash and session redirect behavior.
+
+```json
+"display": "standalone"
+```
+
+This asks the installed app to open without normal browser UI.
+
+The TRD requires `display`.
+
+```json
+"background_color": "#f4f7ff"
+```
+
+This color matches the light app shell background.
+
+The TRD requires `background_color`.
+
+```json
+"theme_color": "#1d4ed8"
+```
+
+This defines the browser/theme accent color.
+
+The TRD requires `theme_color`.
+
+```json
+"icons": [...]
+```
+
+The manifest points to:
+
+- `/icons/icon-192.png`
+- `/icons/icon-512.png`
+
+Those are the exact required icon sizes from the TRD.
+
+### `public/sw.js`
+
+Purpose: cache the app shell and avoid hard crashes while offline.
+
+The file lives in `public`.
+
+Next serves files in `public` from the site root.
+
+So `public/sw.js` is available at:
+
+```txt
+/sw.js
+```
+
+```js
+const CACHE_NAME = "habit-tracker-shell-v1";
+```
+
+This names the service worker cache.
+
+Changing the name later creates a fresh cache version.
+
+```js
+const APP_SHELL_URLS = ["/", "/login", "/signup", "/dashboard", "/manifest.json"];
+```
+
+These are the core shell routes and manifest.
+
+The install event pre-caches them.
+
+The dashboard route is included because the TRD requires the protected app
+shell not to hard-crash offline after it has been loaded once.
+
+```js
+self.addEventListener("install", (event) => {
+```
+
+The install event runs when the service worker is first installed.
+
+```js
+caches.open(CACHE_NAME)
+```
+
+This opens or creates the named cache.
+
+```js
+cache.addAll(APP_SHELL_URLS)
+```
+
+This fetches and stores the shell URLs.
+
+```js
+self.skipWaiting()
+```
+
+This lets the new service worker activate without waiting for old tabs to
+close.
+
+```js
+self.addEventListener("activate", (event) => {
+```
+
+The activate event runs after install.
+
+```js
+caches.keys()
+```
+
+This lists existing cache names.
+
+```js
+filter((cacheName) => cacheName !== CACHE_NAME)
+```
+
+This finds old cache versions.
+
+```js
+caches.delete(cacheName)
+```
+
+This removes old caches.
+
+That prevents stale app shells from living forever.
+
+```js
+self.clients.claim()
+```
+
+This lets the service worker control open pages as soon as it activates.
+
+```js
+self.addEventListener("fetch", (event) => {
+```
+
+The fetch event intercepts network requests from controlled pages.
+
+```js
+if (event.request.method !== "GET") {
+  return;
+}
+```
+
+Only GET requests are cached.
+
+This avoids trying to cache writes or non-idempotent requests.
+
+```js
+fetch(event.request)
+```
+
+The service worker tries the network first.
+
+Network-first keeps development and fresh assets accurate while online.
+
+```js
+const responseCopy = response.clone();
+```
+
+Responses can only be read once.
+
+The clone lets one copy go to the browser and one copy go into the cache.
+
+```js
+cache.put(event.request, responseCopy);
+```
+
+Every successful GET response is stored.
+
+This includes Next JavaScript chunks loaded during the first online visit.
+
+That is what makes later offline reloads able to render the shell.
+
+```js
+catch(async () => {
+```
+
+This block runs when the network fails.
+
+That is the offline path.
+
+```js
+const cachedResponse = await caches.match(event.request);
+```
+
+The service worker first looks for an exact cached response.
+
+If the page asks for a cached JavaScript chunk, this returns that chunk.
+
+```js
+if (event.request.mode === "navigate") {
+  return caches.match("/");
+}
+```
+
+If the request is a page navigation and no exact match exists, return the root
+shell.
+
+This prevents a hard browser crash while offline.
+
+```js
+return new Response("", {
+  status: 504,
+  statusText: "Offline"
+});
+```
+
+If the request is not cached and not a navigation, return a controlled offline
+response.
+
+The app shell can still render.
+
+### `src/components/shared/ServiceWorkerRegistration.tsx`
+
+Purpose: register the service worker from the client.
+
+```tsx
+"use client";
+```
+
+Service workers are a browser API.
+
+The component must be a Client Component.
+
+```tsx
+import { useEffect } from "react";
+```
+
+Registration happens after the page renders in the browser.
+
+That is what `useEffect` is for.
+
+```tsx
+export default function ServiceWorkerRegistration() {
+```
+
+The component renders no visible UI.
+
+It exists only to run the registration side effect.
+
+```tsx
+useEffect(() => {
+```
+
+The effect runs once after mount.
+
+```tsx
+if (!("serviceWorker" in navigator)) {
+  return;
+}
+```
+
+This guards browsers that do not support service workers.
+
+The app should not crash in those browsers.
+
+```tsx
+navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+```
+
+This registers the public service worker file.
+
+The `catch` prevents a registration failure from crashing the UI.
+
+The TRD requires the app to avoid hard crashes offline.
+
+The same defensive idea applies here.
+
+```tsx
+return null;
+```
+
+The component does not render markup.
+
+### `src/app/layout.tsx` PWA Updates
+
+Purpose: attach global metadata and service worker registration.
+
+```tsx
+import ServiceWorkerRegistration from "@/components/shared/ServiceWorkerRegistration";
+```
+
+The root layout imports the client component.
+
+Server Components may render Client Components as children.
+
+The local Next docs confirm the root layout wraps every route.
+
+That makes it the right place for one global service worker registration.
+
+```tsx
+import type { Metadata } from "next";
+```
+
+This imports the metadata type only.
+
+```tsx
+export const metadata: Metadata = {
+  title: "Habit Tracker",
+  description: "Track daily habits with local-first progress persistence.",
+  manifest: "/manifest.json",
+};
+```
+
+`metadata` lets Next add document metadata.
+
+`manifest: "/manifest.json"` links the PWA manifest in the page head.
+
+The metadata export stays in the Server Component layout.
+
+That matches Next's metadata rules.
+
+```tsx
+<ServiceWorkerRegistration />
+```
+
+This mounts the registration side effect for every route.
+
+The component returns `null`, so it does not affect layout or styling.
+
+### Dashboard Hydration Gate
+
+Purpose: prevent false logout redirects on direct dashboard loads.
+
+The dashboard reads session data through `useSyncExternalStore`.
+
+During App Router hydration, the server snapshot is `null`.
+
+The client snapshot updates immediately after hydration.
+
+Without a guard, the dashboard effect can see the first `null` snapshot and
+redirect to `/login` before the real localStorage session is read.
+
+The E2E tests caught this.
+
+```tsx
+const [hasCheckedClientStorage, setHasCheckedClientStorage] = useState(false);
+```
+
+This tracks whether the first client effect has run.
+
+```tsx
+useEffect(() => {
+  setHasCheckedClientStorage(true);
+}, []);
+```
+
+This flips the flag after mount.
+
+That gives `useSyncExternalStore` one client render cycle to provide the real
+localStorage snapshot.
+
+```tsx
+if (!hasCheckedClientStorage) {
+  return;
+}
+```
+
+The redirect effect does nothing until the client storage check has happened.
+
+```tsx
+if (!hasCheckedClientStorage || !session) {
+  return <div className="p-8 text-slate-500">Loading...</div>;
+}
+```
+
+The dashboard shows loading while it is still deciding auth state.
+
+It does not render protected content until a valid session exists.
+
+It does not redirect too early.
+
+This keeps `/dashboard` protected and makes reloads with a valid session work.
+
+### `tests/e2e/app.spec.ts`
+
+Purpose: verify the required TRD browser flows.
+
+```ts
+import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+```
+
+`test` defines browser tests.
+
+`expect` performs auto-waiting browser assertions.
+
+`Page` types helper functions that interact with a tab.
+
+`BrowserContext` types helper functions that control browser-level state such
+as offline mode.
+
+```ts
+type StoredUser = { ... };
+type StoredSession = { ... };
+type StoredHabit = { ... };
+```
+
+These mirror the TRD localStorage shapes.
+
+The E2E tests seed realistic browser storage.
+
+They do not invent a separate schema.
+
+```ts
+const today = new Date().toISOString().split("T")[0];
+```
+
+This matches the app's date format.
+
+Completion tests compare against the same `YYYY-MM-DD` value the app uses.
+
+```ts
+const primaryUser = { ... };
+const secondaryUser = { ... };
+```
+
+Two users make it possible to test user-specific habit filtering.
+
+The dashboard should show only `primaryUser` habits after primary login.
+
+```ts
+function createHabit(overrides: Partial<StoredHabit> = {}): StoredHabit {
+```
+
+This builds valid habit records for localStorage.
+
+Tests override only the field that matters for that scenario.
+
+```ts
+async function resetBrowserState(page: Page, context: BrowserContext) {
+```
+
+This clears browser state before each test.
+
+It sets the browser online.
+
+It visits `/login` to get onto the app origin.
+
+It clears localStorage.
+
+It unregisters service workers.
+
+It deletes caches.
+
+That keeps tests isolated from each other.
+
+```ts
+async function writeAppStorage(page: Page, state: { ... }) {
+```
+
+This helper writes TRD storage keys from inside the browser.
+
+It writes:
+
+- `habit-tracker-users`
+- `habit-tracker-habits`
+- `habit-tracker-session`
+
+It removes the session key when `session` is missing.
+
+This lets tests set up auth state without clicking through signup every time.
+
+```ts
+test.beforeEach(async ({ page, context }) => {
+  await resetBrowserState(page, context);
+});
+```
+
+Every E2E test starts from a clean browser state.
+
+#### Splash Redirect Test
+
+Required title:
+
+```ts
+shows the splash screen and redirects unauthenticated users to /login
+```
+
+The test visits `/`.
+
+It expects `data-testid="splash-screen"` to be visible.
+
+It waits for the root route to redirect to `/login`.
+
+It verifies the login email input is visible.
+
+This proves the unauthenticated boot path.
+
+#### Authenticated Root Redirect Test
+
+Required title:
+
+```ts
+redirects authenticated users from / to /dashboard
+```
+
+The test seeds a valid user and session.
+
+It visits `/`.
+
+It sees the splash.
+
+It waits for `/dashboard`.
+
+It verifies `data-testid="dashboard-page"`.
+
+This proves the authenticated boot path.
+
+#### Dashboard Protection Test
+
+Required title:
+
+```ts
+prevents unauthenticated access to /dashboard
+```
+
+The test visits `/dashboard` with no session.
+
+It expects redirect to `/login`.
+
+This proves the protected route behavior.
+
+#### Signup E2E Test
+
+Required title:
+
+```ts
+signs up a new user and lands on the dashboard
+```
+
+The test fills the signup email and password fields.
+
+It clicks the signup submit button.
+
+It expects `/dashboard`.
+
+It reads `habit-tracker-session` from real browser localStorage.
+
+It checks the session email.
+
+This proves signup works through the browser.
+
+#### Login Filtering Test
+
+Required title:
+
+```ts
+logs in an existing user and loads only that user's habits
+```
+
+The test seeds two users.
+
+It seeds one habit for each user.
+
+It logs in as the primary user.
+
+It expects the primary habit card to render.
+
+It expects the secondary user's habit card not to exist.
+
+This proves dashboard habit filtering by `session.userId`.
+
+#### Create Habit E2E Test
+
+Required title:
+
+```ts
+creates a habit from the dashboard
+```
+
+The test starts with a valid session and no habits.
+
+It opens the habit form through `create-habit-button`.
+
+It fills `habit-name-input`.
+
+It fills `habit-description-input`.
+
+It clicks `habit-save-button`.
+
+It expects the slugged habit card test ID to appear.
+
+It reads `habit-tracker-habits` and verifies the saved object.
+
+This proves create behavior in the browser and in persistence.
+
+#### Complete Habit E2E Test
+
+Required title:
+
+```ts
+completes a habit for today and updates the streak
+```
+
+The test starts with one incomplete habit.
+
+It verifies the streak is zero.
+
+It clicks the slugged completion button.
+
+It expects the streak text to become one day.
+
+It reads localStorage and checks that today's date was added.
+
+This proves UI and persistence update together.
+
+#### Reload Persistence Test
+
+Required title:
+
+```ts
+persists session and habits after page reload
+```
+
+The test creates a habit through the UI.
+
+It reloads the page.
+
+It expects to remain on dashboard.
+
+It expects the created habit card to still render.
+
+This proves localStorage state survives reload.
+
+#### Logout E2E Test
+
+Required title:
+
+```ts
+logs out and redirects to /login
+```
+
+The test starts authenticated.
+
+It clicks `auth-logout-button`.
+
+It expects `/login`.
+
+It checks that `habit-tracker-session` is removed.
+
+This proves logout behavior.
+
+#### Offline Shell E2E Test
+
+Required title:
+
+```ts
+loads the cached app shell when offline after the app has been loaded once
+```
+
+The test visits `/login` while online.
+
+That gives the service worker a chance to register and cache assets.
+
+It waits for `navigator.serviceWorker.ready`.
+
+It reloads online once so the active service worker controls the page.
+
+It switches the browser context offline.
+
+It reloads again.
+
+It expects the login shell to still render.
+
+This proves the PWA shell does not hard-crash offline after first load.
+
 ## Current Remaining Work
 
 ## `src/components/shared/SplashScreen.tsx`
