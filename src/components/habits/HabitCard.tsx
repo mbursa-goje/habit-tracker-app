@@ -144,20 +144,20 @@ export default function HabitCard({
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-[24px] border border-blue-100 bg-[#f5f8ff] p-6">
+        <div className="flex min-h-32 flex-col justify-center rounded-[24px] border border-blue-100 bg-[#f5f8ff] p-6">
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
             Completion
           </p>
-          <p className="mt-4 text-4xl font-bold text-slate-950 sm:text-5xl">
+          <p className="mt-3 text-4xl font-bold leading-none text-slate-950 sm:text-5xl">
             {completionRate}%
           </p>
         </div>
 
-        <div className="rounded-[24px] border border-blue-100 bg-[#f5f8ff] p-6">
+        <div className="flex min-h-32 flex-col justify-center rounded-[24px] border border-blue-100 bg-[#f5f8ff] p-6">
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
             Consistency
           </p>
-          <p className="mt-4 text-4xl font-bold text-slate-950 sm:text-5xl">
+          <p className="mt-3 text-4xl font-bold leading-none text-slate-950 sm:text-5xl">
             {consistencyLabel}
           </p>
         </div>
