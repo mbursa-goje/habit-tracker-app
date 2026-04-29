@@ -203,11 +203,11 @@ export default function HabitForm({
 
       <aside className="h-full">
         <section className="flex h-full min-h-[clamp(520px,68vh,720px)] flex-col rounded-lg border border-slate-200 bg-white p-5 lg:p-7">
-          <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+          <h3 className="text-xl flex justify-center font-bold uppercase tracking-wide text-slate-500">
             Performance Summary
           </h3>
 
-          <div className="flex flex-1 flex-col items-center justify-center gap-10 py-10 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center gap-10 py-8 text-center">
             <div className="w-full max-w-xs rounded-2xl bg-blue-50 p-6 lg:p-7">
               <div className="flex flex-col items-center gap-4">
                 <div className="grid h-[4.5rem] w-[4.5rem] shrink-0 place-items-center rounded-2xl bg-emerald-300 text-emerald-900 lg:h-20 lg:w-20">
