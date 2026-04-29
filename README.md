@@ -152,7 +152,9 @@ The dashboard keeps the TRD test IDs in place while adding user-facing polish:
   and confirmation controls do not become cramped on wider dashboard columns.
 - Icon-only mobile create/logout controls expose hover/focus tooltips. Text
   buttons such as Add, New Habit, Create Habit, and Log Out rely on their
-  visible labels instead of redundant tooltips.
+  visible labels instead of redundant tooltips. The mobile header New Habit CTA
+  has extra height, padding, and a soft shadow so it reads as the primary action
+  without needing to be centered.
 - Add and edit actions scroll the habit form into view so the user can
   immediately see the form they just opened.
 - Create/edit mode uses the full dashboard width on larger screens, and the

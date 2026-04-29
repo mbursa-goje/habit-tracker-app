@@ -691,6 +691,28 @@ meaning is not visible on the screen.
 The required `data-testid="create-habit-button"` remains on the header create
 button.
 
+The header create button uses:
+
+```tsx
+min-h-11 px-5 py-2.5 rounded-xl shadow-lg
+```
+
+`min-h-11` makes the button easier to tap on small screens.
+
+`px-5` gives the button more horizontal width.
+
+`py-2.5` gives the button more vertical breathing room.
+
+`rounded-xl` makes the CTA feel more polished than a tiny utility button.
+
+`shadow-lg shadow-blue-200/70` gives it a soft blue lift so it reads as the
+primary action beside the quieter notification icon.
+
+The button stays left-aligned with the dashboard heading.
+
+That matches utility dashboard patterns better than centering the actions while
+the page title remains left-aligned.
+
 The required `data-testid="auth-logout-button"` remains on the sidebar logout
 button.
 

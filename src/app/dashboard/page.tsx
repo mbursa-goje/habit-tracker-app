@@ -303,7 +303,7 @@ export default function Dashboard() {
                 type="button"
                 data-testid="create-habit-button"
                 onClick={openCreateForm}
-                className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-200/70 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:px-6"
               >
                 <Plus className="h-4 w-4" />
                 New Habit
