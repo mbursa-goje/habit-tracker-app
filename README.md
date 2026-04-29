@@ -138,6 +138,20 @@ The dashboard filters habits by `session.userId`, so one user only sees their
 own habits. Completion dates use `YYYY-MM-DD` strings and are toggled through
 the shared `toggleHabitCompletion` helper.
 
+## Dashboard UI Notes
+
+The dashboard keeps the TRD test IDs in place while adding user-facing polish:
+
+- The summary panel uses a blue progress ring, compact metric tiles, and a
+  softened blue border.
+- Habit cards keep action areas responsive so edit, delete, completion, cancel,
+  and confirmation controls do not become cramped on wider dashboard columns.
+- Create and logout controls expose hover/focus tooltips, including the sidebar
+  Add action, the top New Habit button, the empty-state Create Habit button, and
+  the mobile floating create/logout buttons.
+- Developer-only helper copy such as the old Stage Scope card was removed from
+  the visible product UI.
+
 ## PWA Support
 
 PWA support is implemented with:

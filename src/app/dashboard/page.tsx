@@ -21,7 +21,13 @@ import {
   TrendingUp,
   User,
 } from "lucide-react";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 const EMPTY_HABITS: Habit[] = [];
 
@@ -54,6 +60,23 @@ function getClientHydrationSnapshot() {
 
 function getServerHydrationSnapshot() {
   return false;
+}
+
+function DashboardTooltip({
+  children,
+  className = "bottom-full left-1/2 mb-2 -translate-x-1/2",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <span
+      role="tooltip"
+      className={`pointer-events-none absolute z-30 whitespace-nowrap rounded-md bg-slate-950 px-3 py-2 text-xs font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 ${className}`}
+    >
+      {children}
+    </span>
+  );
 }
 
 export default function Dashboard() {
@@ -204,18 +227,24 @@ export default function Dashboard() {
 
         <nav className="flex flex-col gap-2">
           {navItems.map((item) => (
-            <button
-              key={item.name}
-              type="button"
-              onClick={item.name === "Add" ? openCreateForm : undefined}
-              className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${item.active
-                ? "border border-blue-100 bg-blue-50 text-blue-700 shadow-sm"
-                : "text-slate-600 hover:bg-slate-50"
-                }`}
-            >
-              <item.icon size={18} />
-              {item.name}
-            </button>
+            <div key={item.name} className="group relative">
+              <button
+                type="button"
+                onClick={item.name === "Add" ? openCreateForm : undefined}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${item.active
+                  ? "border border-blue-100 bg-blue-50 text-blue-700 shadow-sm"
+                  : "text-slate-600 hover:bg-slate-50"
+                  }`}
+              >
+                <item.icon size={18} />
+                {item.name}
+              </button>
+              {item.name === "Add" && (
+                <DashboardTooltip className="left-full top-1/2 ml-3 -translate-y-1/2">
+                  Add a new habit
+                </DashboardTooltip>
+              )}
+            </div>
           ))}
         </nav>
 
@@ -226,15 +255,18 @@ export default function Dashboard() {
           <p className="break-all text-sm font-semibold text-slate-700">
             {session.email}
           </p>
-          <button
-            type="button"
-            data-testid="auth-logout-button"
-            onClick={handleLogout}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400"
-          >
-            <LogOut className="h-4 w-4" />
-            Log Out
-          </button>
+          <div className="group relative mt-4">
+            <button
+              type="button"
+              data-testid="auth-logout-button"
+              onClick={handleLogout}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400"
+            >
+              <LogOut className="h-4 w-4" />
+              Log Out
+            </button>
+            <DashboardTooltip>Log out of this session</DashboardTooltip>
+          </div>
         </div>
       </aside>
 
@@ -259,15 +291,20 @@ export default function Dashboard() {
               <Bell size={18} />
             </button>
 
-            <button
-              type="button"
-              data-testid="create-habit-button"
-              onClick={openCreateForm}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              <Plus className="h-4 w-4" />
-              New Habit
-            </button>
+            <div className="group relative">
+              <button
+                type="button"
+                data-testid="create-habit-button"
+                onClick={openCreateForm}
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <Plus className="h-4 w-4" />
+                New Habit
+              </button>
+              <DashboardTooltip className="right-0 top-full mt-2">
+                Create a new habit
+              </DashboardTooltip>
+            </div>
           </div>
           </div>
         </header>
@@ -368,14 +405,17 @@ export default function Dashboard() {
                 <p className="mt-2 text-sm text-slate-500">
                   Create your first daily habit to start tracking progress.
                 </p>
-                <button
-                  type="button"
-                  onClick={openCreateForm}
-                  className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Create Habit
-                </button>
+                <div className="group relative mt-5 inline-flex">
+                  <button
+                    type="button"
+                    onClick={openCreateForm}
+                    className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Create Habit
+                  </button>
+                  <DashboardTooltip>Create your first habit</DashboardTooltip>
+                </div>
               </div>
             ) : (
               <HabitList
@@ -443,23 +483,33 @@ export default function Dashboard() {
         </section>
 
         <div className="fixed bottom-6 right-6 flex items-center gap-2 md:hidden">
-          <button
-            type="button"
-            className="rounded-xl border border-slate-200 bg-white p-3 text-slate-600 shadow-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-red-400"
-            onClick={handleLogout}
-            aria-label="Log out"
-          >
-            <LogOut size={18} />
-          </button>
+          <div className="group relative">
+            <button
+              type="button"
+              className="rounded-xl border border-slate-200 bg-white p-3 text-slate-600 shadow-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-red-400"
+              onClick={handleLogout}
+              aria-label="Log out"
+            >
+              <LogOut size={18} />
+            </button>
+            <DashboardTooltip className="bottom-full right-0 mb-2">
+              Log out
+            </DashboardTooltip>
+          </div>
 
-          <button
-            type="button"
-            onClick={openCreateForm}
-            className="rounded-xl bg-blue-700 p-3 text-white shadow-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Create habit"
-          >
-            <Plus size={22} />
-          </button>
+          <div className="group relative">
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className="rounded-xl bg-blue-700 p-3 text-white shadow-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Create habit"
+            >
+              <Plus size={22} />
+            </button>
+            <DashboardTooltip className="bottom-full right-0 mb-2">
+              Create habit
+            </DashboardTooltip>
+          </div>
 
           <button
             type="button"

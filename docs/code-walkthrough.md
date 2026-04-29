@@ -37,6 +37,205 @@ The app must keep habit persistence local and deterministic:
 - Dashboard must only show habits for the active `session.userId`.
 - Completion is stored as calendar dates in `YYYY-MM-DD` format.
 
+## Recent Dashboard UI Polish
+
+Purpose: document the final user-facing dashboard polish that was added after
+the core TRD behavior was already working.
+
+The dashboard still keeps the required TRD behavior and test IDs.
+
+The visual polish does not change localStorage shapes.
+
+The visual polish does not change authentication behavior.
+
+The visual polish does not rename required test IDs.
+
+### Dashboard Tooltips
+
+The dashboard now includes a small `DashboardTooltip` helper in:
+
+```txt
+src/app/dashboard/page.tsx
+```
+
+The helper receives `children`.
+
+`children` is the tooltip text.
+
+The helper also receives an optional `className`.
+
+`className` lets each tooltip choose its position.
+
+The default position places the tooltip above the control.
+
+The sidebar Add tooltip overrides the position so it appears beside the
+sidebar item.
+
+The tooltip element uses:
+
+```tsx
+role="tooltip"
+```
+
+This gives the element a clear accessibility role.
+
+The tooltip uses:
+
+```tsx
+pointer-events-none
+```
+
+This prevents the tooltip itself from stealing mouse hover.
+
+The tooltip uses:
+
+```tsx
+absolute z-30
+```
+
+`absolute` lets the tooltip position relative to the nearest `relative`
+wrapper.
+
+`z-30` keeps it above nearby cards and panels.
+
+The tooltip uses:
+
+```tsx
+opacity-0
+```
+
+This keeps it hidden by default.
+
+The tooltip uses:
+
+```tsx
+group-hover:opacity-100
+group-focus-within:opacity-100
+```
+
+`group-hover` shows the tooltip when the wrapper is hovered.
+
+`group-focus-within` shows the tooltip when the button receives keyboard focus.
+
+That means mouse users and keyboard users both get the same hint.
+
+Tooltips were added to these dashboard controls:
+
+- Sidebar Add button.
+- Header New Habit button.
+- Empty-state Create Habit button.
+- Sidebar logout button.
+- Mobile floating create button.
+- Mobile floating logout button.
+
+The required `data-testid="create-habit-button"` remains on the header create
+button.
+
+The required `data-testid="auth-logout-button"` remains on the sidebar logout
+button.
+
+### Dashboard Summary Ring
+
+The dashboard progress ring was enlarged because the first version felt tight.
+
+The outer ring now uses a larger fixed size.
+
+The inner white circle fills the remaining space.
+
+The percentage uses a stronger text size.
+
+The `Daily Goal` label has a small top margin and tighter line height.
+
+This keeps the ring readable without changing the progress calculation.
+
+The progress calculation still uses:
+
+```tsx
+doneTodayCount / activeCount
+```
+
+The visual ring still uses:
+
+```tsx
+conic-gradient(...)
+```
+
+The UI changed.
+
+The data model did not.
+
+### Habit Card Spacing
+
+The habit card action area was adjusted because the horizontal layout became
+too cramped inside the dashboard grid.
+
+The edit and delete buttons now use fixed icon hit areas.
+
+That keeps the pencil and trash icons visible.
+
+The habit title and description use `min-w-0` and wrapping classes.
+
+That lets long user-entered text wrap instead of pushing buttons out of shape.
+
+The completion button uses a minimum height and a full-width layout until very
+wide screens.
+
+That keeps `Complete` and `Completed` readable.
+
+The delete confirmation controls use a grid on smaller widths.
+
+That prevents `Cancel` and `Confirm Delete` from colliding.
+
+All required habit card test IDs remain unchanged:
+
+- `habit-card-{slug}`
+- `habit-streak-{slug}`
+- `habit-complete-{slug}`
+- `habit-edit-{slug}`
+- `habit-delete-{slug}`
+- `confirm-delete-button`
+
+### Habit Form Action Spacing
+
+The habit form action buttons were adjusted because the save and discard
+buttons were too narrow on wider dashboard columns.
+
+The action row now uses flex wrapping.
+
+Each action button has a minimum width.
+
+Each action button can flex to share available space.
+
+The icon inside each button uses `shrink-0`.
+
+That keeps the save, discard, and trash icons visible.
+
+The button labels use `whitespace-nowrap`.
+
+That prevents labels like `Save Changes` from splitting awkwardly.
+
+The layout can wrap to a new line when space is limited.
+
+That is better than compressing icons and text into an unreadable button.
+
+The required `data-testid="habit-save-button"` remains unchanged.
+
+### Removed Developer-Facing Panel
+
+The visible `Stage Scope` card was removed from the habit form sidebar.
+
+It contained implementation labels such as:
+
+- `Daily Only`
+- `Local Storage`
+- `TRD Safe`
+
+Those ideas are still true technically.
+
+They belong in documentation, not in the user-facing dashboard.
+
+The dashboard now focuses on habit performance and direct actions.
+
 ## App Router Mental Model
 
 The project uses the Next.js App Router.
