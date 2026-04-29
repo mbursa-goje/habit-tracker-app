@@ -37,10 +37,10 @@ export default function HabitCard({
         Active Habit
       </p>
 
-      <div className="rounded-[28px] border border-[#d9e2f1] bg-white p-7 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+      <div className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_16px_45px_rgba(37,99,235,0.08)] sm:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-slate-950">
+            <h2 className="text-2xl font-bold text-slate-950 sm:text-3xl">
               {habit.name}
             </h2>
 
@@ -88,7 +88,7 @@ export default function HabitCard({
             </div>
 
             <div>
-              <p className="text-2xl font-semibold text-slate-700">
+              <p className="text-xl font-semibold text-slate-700 sm:text-2xl">
                 Daily Discipline
               </p>
               <p className="mt-1 text-sm text-slate-400">
@@ -101,7 +101,7 @@ export default function HabitCard({
             type="button"
             data-testid={`habit-complete-${slug}`}
             onClick={onToggleComplete}
-            className={`inline-flex items-center justify-center gap-3 rounded-full px-7 py-4 text-xl font-semibold text-white shadow-[0_12px_24px_rgba(29,78,216,0.18)] transition focus:outline-none focus:ring-2 focus:ring-blue-500 ${isCompletedToday
+            className={`inline-flex items-center justify-center gap-3 rounded-full px-6 py-3.5 text-lg font-semibold text-white shadow-[0_12px_24px_rgba(29,78,216,0.18)] transition focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-7 sm:py-4 sm:text-xl ${isCompletedToday
               ? "bg-emerald-600 hover:bg-emerald-700"
               : "bg-blue-700 hover:bg-blue-800"
               }`}
@@ -142,20 +142,20 @@ export default function HabitCard({
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-[24px] border border-[#d9e2f1] bg-[#f5f8ff] p-6">
+        <div className="rounded-[24px] border border-blue-100 bg-[#f5f8ff] p-6">
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
             Completion
           </p>
-          <p className="mt-4 text-5xl font-bold text-slate-950">
+          <p className="mt-4 text-4xl font-bold text-slate-950 sm:text-5xl">
             {completionRate}%
           </p>
         </div>
 
-        <div className="rounded-[24px] border border-[#d9e2f1] bg-[#f5f8ff] p-6">
+        <div className="rounded-[24px] border border-blue-100 bg-[#f5f8ff] p-6">
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
             Consistency
           </p>
-          <p className="mt-4 text-5xl font-bold text-slate-950">
+          <p className="mt-4 text-4xl font-bold text-slate-950 sm:text-5xl">
             {consistencyLabel}
           </p>
         </div>

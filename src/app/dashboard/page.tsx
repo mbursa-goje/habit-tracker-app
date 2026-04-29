@@ -188,8 +188,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f5f7fb]" data-testid="dashboard-page">
-      <aside className="fixed hidden h-full w-64 flex-col border-r border-slate-200 bg-white p-5 md:flex">
+    <div
+      className="flex min-h-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%,_#f3f7ff_52%,_#edf3ff_100%)]"
+      data-testid="dashboard-page"
+    >
+      <aside className="fixed hidden h-full w-64 flex-col border-r border-blue-100 bg-white/90 p-5 backdrop-blur md:flex">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-blue-700">
             Habit Tracker
@@ -206,7 +209,7 @@ export default function Dashboard() {
               type="button"
               onClick={item.name === "Add" ? openCreateForm : undefined}
               className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${item.active
-                ? "bg-blue-50 text-blue-700"
+                ? "border border-blue-100 bg-blue-50 text-blue-700 shadow-sm"
                 : "text-slate-600 hover:bg-slate-50"
                 }`}
             >
@@ -216,7 +219,7 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        <div className="mt-auto rounded-xl border border-slate-200 bg-white p-4">
+        <div className="mt-auto rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50 p-4 shadow-sm">
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-500">
             Signed In
           </p>
@@ -235,8 +238,9 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      <main className="flex-1 p-4 md:ml-64 md:p-6 lg:p-7">
-        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <main className="flex-1 p-4 md:ml-64 md:p-6 lg:p-8">
+        <header className="mb-6 rounded-3xl border border-blue-100 bg-white/80 p-5 shadow-[0_12px_40px_rgba(37,99,235,0.08)] backdrop-blur sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
               Performance Dashboard
@@ -265,45 +269,46 @@ export default function Dashboard() {
               New Habit
             </button>
           </div>
+          </div>
         </header>
 
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="space-y-4 lg:col-span-2">
+        <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)]">
+          <div className="space-y-5">
             {isFormOpen && (
               <HabitForm
-              key={editingHabit?.id ?? "new-habit"}
-              habit={editingHabit ?? undefined}
-              today={today}
-              mode={editingHabit ? "edit" : "create"}
-              onSave={handleSaveHabit}
-              onDiscard={closeHabitForm}
-              onDelete={
-                editingHabit
-                  ? () => {
+                key={editingHabit?.id ?? "new-habit"}
+                habit={editingHabit ?? undefined}
+                today={today}
+                mode={editingHabit ? "edit" : "create"}
+                onSave={handleSaveHabit}
+                onDiscard={closeHabitForm}
+                onDelete={
+                  editingHabit
+                    ? () => {
                       handleDeleteHabit(editingHabit.id);
                       closeHabitForm();
                     }
-                  : undefined
-              }
-            />
+                    : undefined
+                }
+              />
             )}
 
-            <div className="rounded-2xl border border-blue-500 bg-white p-5">
-              <div className="grid grid-cols-2 items-center gap-4 md:grid-cols-4">
-                <div className="flex items-center gap-4 md:col-span-1">
+            <div className="rounded-3xl border border-blue-200 bg-white px-4 py-5 shadow-[0_18px_50px_rgba(37,99,235,0.08)] sm:px-5">
+              <div className="grid grid-cols-2 items-center gap-4 md:grid-cols-[auto_repeat(3,minmax(0,1fr))] md:gap-6">
+                <div className="flex items-center gap-4 md:col-span-1 md:justify-start">
                   <div
-                    className="grid h-24 w-24 place-items-center rounded-full p-5"
+                    className="grid h-20 w-20 place-items-center rounded-full p-[0.35rem] sm:h-24 sm:w-24"
                     style={{
                       background: `conic-gradient(#1d4ed8 ${progressPercent * 3.6
                         }deg, #e2e8f0 0deg)`,
                     }}
                   >
-                    <div className="grid h-20 w-20 place-items-center rounded-full bg-white">
+                    <div className="grid h-full w-full place-items-center rounded-full bg-white shadow-inner">
                       <div className="text-center">
-                        <p className="text-2xl font-black text-slate-700">
+                        <p className="text-xl font-black text-slate-800 sm:text-2xl">
                           {progressPercent}%
                         </p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 sm:text-[10px]">
                           Daily Goal
                         </p>
                       </div>
@@ -311,39 +316,51 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                <div className="rounded-2xl border border-blue-50 bg-blue-50/40 p-3 sm:p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Completed
                   </p>
-                  <p className="mt-1 text-2xl font-extrabold text-slate-900">
+                  <p className="mt-2 text-2xl font-extrabold leading-none text-slate-900 sm:text-3xl">
                     {doneTodayCount}/{activeCount}
                   </p>
                 </div>
 
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                <div className="rounded-2xl border border-blue-50 bg-blue-50/40 p-3 sm:p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Active
                   </p>
-                  <p className="mt-1 text-2xl font-extrabold text-slate-900">
+                  <p className="mt-2 text-2xl font-extrabold leading-none text-slate-900 sm:text-3xl">
                     {activeCount}
                   </p>
                 </div>
 
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                <div className="rounded-2xl border border-blue-50 bg-blue-50/40 p-3 sm:p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Best Streak
                   </p>
-                  <p className="mt-1 text-2xl font-extrabold text-slate-900">
-                    {bestStreak} Days
+                  <p className="mt-2 text-2xl font-extrabold leading-none text-slate-900 sm:text-3xl">
+                    {bestStreak}
+                    <span className="ml-2 text-xl sm:text-2xl">Days</span>
                   </p>
                 </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">
+                  Active Habits
+                </h3>
+                <p className="text-sm text-slate-500">
+                  Your current daily disciplines and progress controls.
+                </p>
               </div>
             </div>
 
             {userHabits.length === 0 ? (
               <div
                 data-testid="empty-state"
-                className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center"
+                className="rounded-3xl border border-dashed border-blue-200 bg-white p-8 text-center shadow-sm"
               >
                 <h3 className="text-xl font-bold text-slate-900">
                   No habits yet
@@ -371,16 +388,19 @@ export default function Dashboard() {
             )}
           </div>
 
-          <aside className="space-y-4">
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-800 p-5 text-white">
-              <div className="h-40 rounded-xl bg-gradient-to-b from-slate-500 to-slate-900 p-4">
+          <aside className="space-y-5">
+            <div className="overflow-hidden rounded-3xl border border-blue-100 bg-slate-900 p-5 text-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
+              <div className="rounded-2xl bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.35),_rgba(15,23,42,0.85)_65%)] p-5">
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-blue-200">
+                  Daily Insight
+                </p>
                 <p className="mt-16 text-2xl italic leading-tight">
                   &quot;Discipline is the bridge between goals and accomplishment.&quot;
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm">
               <h3 className="mb-4 text-xl font-bold text-slate-900">
                 Weekly Consistency
               </h3>
@@ -405,7 +425,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="rounded-2xl bg-blue-700 p-5 text-white">
+            <div className="rounded-3xl bg-gradient-to-br from-blue-700 via-blue-700 to-blue-900 p-5 text-white shadow-[0_18px_50px_rgba(29,78,216,0.22)]">
               <p className="text-xs font-bold uppercase tracking-widest text-blue-200">
                 Next Up
               </p>
