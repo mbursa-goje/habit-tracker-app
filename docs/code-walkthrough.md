@@ -2672,6 +2672,562 @@ This marks the logout control.
 
 Logout removes the session and redirects to `/login`.
 
+## Integration Tests
+
+Purpose: verify real component behavior with React Testing Library.
+
+Unit tests prove the pure helpers work.
+
+Integration tests prove users can interact with forms and cards through the
+same labels, inputs, buttons, storage keys, and test IDs that the TRD requires.
+
+Integration tests should stay closer to user behavior than implementation
+details.
+
+That is why they use `userEvent` instead of directly calling component
+functions.
+
+### Auth Integration Redirect Seam
+
+`LoginForm` and `SignupForm` accept an optional `onSuccessRedirect` prop.
+
+The normal production default is:
+
+```tsx
+onSuccessRedirect = (path) => {
+  window.location.href = path;
+}
+```
+
+`path` is the target route.
+
+For login and signup, the successful target is `/dashboard`.
+
+`window.location.href = path` performs a browser navigation in the real app.
+
+Tests should not perform a real jsdom navigation.
+
+jsdom is a simulated browser environment, not a full Next.js browser runtime.
+
+The optional prop lets tests pass `vi.fn()`.
+
+That keeps production behavior unchanged.
+
+It also lets the test assert that the form intended to redirect to
+`/dashboard`.
+
+This is a small test seam.
+
+A test seam is a controlled way to observe side effects during tests.
+
+The important rule is that the seam must not weaken the user-facing behavior.
+
+Here it does not weaken behavior because the default still navigates.
+
+### `tests/integration/auth-flow.test.tsx`
+
+Purpose: cover the exact TRD auth-flow test titles.
+
+```tsx
+// @vitest-environment jsdom
+```
+
+This makes the test file run with browser-like globals.
+
+The auth forms use `localStorage`.
+
+`localStorage` does not exist in a plain Node test environment.
+
+jsdom provides `window`, `document`, form events, inputs, buttons, and
+`localStorage`.
+
+```tsx
+import { cleanup, render, screen } from "@testing-library/react";
+```
+
+`render` mounts React components into the jsdom document.
+
+`screen` queries the rendered document the way a user-facing test should.
+
+`cleanup` unmounts rendered components after each test.
+
+```tsx
+import userEvent from "@testing-library/user-event";
+```
+
+`userEvent` simulates realistic user actions.
+
+Typing into an input fires keyboard and input events.
+
+Clicking a button fires pointer and click events.
+
+That makes the test closer to real browser behavior than direct state changes.
+
+```tsx
+import { afterEach, describe, expect, it, vi } from "vitest";
+```
+
+`describe` groups the auth-flow tests.
+
+The describe name must be exactly `auth flow`.
+
+`it` defines each required test title.
+
+`expect` performs assertions.
+
+`vi` creates spies such as `vi.fn()`.
+
+`afterEach` resets test state after every test.
+
+```tsx
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+  vi.restoreAllMocks();
+});
+```
+
+`cleanup()` removes mounted React components.
+
+`localStorage.clear()` prevents one test's stored users or session from leaking
+into the next test.
+
+`vi.restoreAllMocks()` resets spies and mocked behavior.
+
+Together these lines make each test deterministic.
+
+```tsx
+describe("auth flow", () => {
+```
+
+This describe block name is required by the TRD.
+
+Changing the text would make the test output drift from the specification.
+
+#### Signup Success Test
+
+Required title:
+
+```tsx
+it("submits the signup form and creates a session", async () => {
+```
+
+This test proves signup creates both required localStorage records.
+
+It creates `const user = userEvent.setup()`.
+
+That prepares a user-event controller for async typing and clicking.
+
+It creates `const redirect = vi.fn()`.
+
+That spy records whether the form requested navigation.
+
+It renders:
+
+```tsx
+<SignupForm onSuccessRedirect={redirect} />
+```
+
+The component is the real signup form.
+
+Only the redirect action is swapped for a spy.
+
+The test types into:
+
+```tsx
+auth-signup-email
+auth-signup-password
+```
+
+Those are the exact TRD signup form test IDs.
+
+The test clicks:
+
+```tsx
+auth-signup-submit
+```
+
+That runs the real form submit handler.
+
+After submit, the test reads:
+
+```tsx
+habit-tracker-users
+habit-tracker-session
+```
+
+Those are the exact TRD localStorage keys.
+
+It expects one stored user.
+
+It expects the stored user email and password to match the form input.
+
+It expects the session to contain `userId` and `email`.
+
+It expects `userId` to match the newly created user's `id`.
+
+It expects redirect to be called with `/dashboard`.
+
+That covers the TRD signup success behavior.
+
+#### Duplicate Signup Test
+
+Required title:
+
+```tsx
+it("shows an error for duplicate signup email", async () => {
+```
+
+This test first seeds `habit-tracker-users`.
+
+The seeded user has `taken@example.com`.
+
+The form then tries to sign up with the same email.
+
+The submit handler must reject the duplicate.
+
+The visible message must be:
+
+```txt
+User already exists
+```
+
+That message is required by the TRD.
+
+The test also confirms no session is created.
+
+That matters because failed signup must not authenticate the user.
+
+#### Login Success Test
+
+Required title:
+
+```tsx
+it("submits the login form and stores the active session", async () => {
+```
+
+This test seeds one user into `habit-tracker-users`.
+
+The test renders the real `LoginForm`.
+
+It types matching email and password into:
+
+```tsx
+auth-login-email
+auth-login-password
+```
+
+It clicks:
+
+```tsx
+auth-login-submit
+```
+
+The login handler reads local users.
+
+It finds the matching email/password pair.
+
+It writes `habit-tracker-session`.
+
+The test expects the session to contain:
+
+```ts
+{
+  userId: "user-1",
+  email: "member@example.com",
+}
+```
+
+It also expects redirect to `/dashboard`.
+
+This covers the TRD login success behavior.
+
+#### Invalid Login Test
+
+Required title:
+
+```tsx
+it("shows an error for invalid login credentials", async () => {
+```
+
+This test seeds a real user.
+
+It then types the correct email but wrong password.
+
+The handler must reject the credentials.
+
+The visible message must be:
+
+```txt
+Invalid email or password
+```
+
+That message is required by the TRD.
+
+The test also confirms `habit-tracker-session` remains missing.
+
+That prevents invalid login from accidentally creating a session.
+
+### `tests/integration/habit-form.test.tsx`
+
+Purpose: cover the exact TRD habit-form test titles.
+
+The file uses jsdom because it renders React components and interacts with
+buttons, inputs, textareas, and local component state.
+
+```tsx
+const today = "2026-04-29";
+```
+
+The tests use a fixed date.
+
+Fixed dates make streak behavior deterministic.
+
+Without a fixed date, tests would change depending on when they run.
+
+```tsx
+function createHabit(overrides: Partial<Habit> = {}): Habit {
+```
+
+This helper creates a valid TRD habit object.
+
+`Partial<Habit>` allows each test to override only the fields it cares about.
+
+The base habit includes:
+
+- `id`
+- `userId`
+- `name`
+- `description`
+- `frequency: "daily"`
+- `createdAt`
+- `completions`
+
+Those fields match the TRD habit storage shape.
+
+The helper keeps tests short without weakening the habit contract.
+
+```tsx
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
+```
+
+The habit integration tests do not need localStorage cleanup because they test
+components directly.
+
+They still unmount components and reset spies after each test.
+
+```tsx
+describe("habit form", () => {
+```
+
+This describe block name is required by the TRD.
+
+Changing it would make the mentor-facing test output wrong.
+
+#### Empty Habit Name Test
+
+Required title:
+
+```tsx
+it("shows a validation error when habit name is empty", async () => {
+```
+
+This test renders `HabitForm` without an existing habit.
+
+That means the form is in create mode.
+
+It clicks `habit-save-button` without typing a name.
+
+The form calls `validateHabitName`.
+
+The validator trims the empty value.
+
+The visible error must be:
+
+```txt
+Habit name is required
+```
+
+That is the exact TRD validation message.
+
+The test also confirms `onSave` was not called.
+
+That matters because invalid input must not create or update a habit.
+
+#### Create Habit Test
+
+Required title:
+
+```tsx
+it("creates a new habit and renders it in the list", async () => {
+```
+
+This test uses a small `HabitCreationHarness` component.
+
+The harness owns `const [habits, setHabits] = useState<Habit[]>([])`.
+
+That mimics the dashboard owning the habit list.
+
+The harness passes a real `saveHabit` function into `HabitForm`.
+
+When the form saves, the harness creates a TRD-shaped habit and stores it in
+React state.
+
+The harness maps `habits` into real `HabitCard` components.
+
+The test types a habit name and description.
+
+It clicks `habit-save-button`.
+
+It then expects:
+
+```tsx
+habit-card-drink-water
+```
+
+That proves the card rendered with the slug-based TRD test ID.
+
+The test uses `within(habitCard)` to check the description.
+
+That is important because the same description still exists inside the
+textarea.
+
+`within(habitCard)` tells Testing Library to search inside the card only.
+
+#### Edit Habit Test
+
+Required title:
+
+```tsx
+it("edits an existing habit and preserves immutable fields", async () => {
+```
+
+This test starts with an existing habit.
+
+The existing habit already has a completion date.
+
+The form receives that habit through the `habit` prop.
+
+That puts `HabitForm` into edit mode.
+
+The test clears the name input.
+
+It types a new habit name.
+
+It clears the description textarea.
+
+It types a new description.
+
+It clicks save.
+
+The test builds an updated habit the same way the dashboard edit path should:
+
+- preserve `id`
+- preserve `userId`
+- preserve `createdAt`
+- preserve `completions`
+- update `name`
+- update `description`
+- keep `frequency: "daily"`
+
+Those preservation rules come directly from the TRD edit habit section.
+
+The test checks all of those fields at once with `toMatchObject`.
+
+#### Delete Confirmation Test
+
+Required title:
+
+```tsx
+it("deletes a habit only after explicit confirmation", async () => {
+```
+
+This test renders a real `HabitCard`.
+
+It passes `deleteHabit = vi.fn()` as `onDelete`.
+
+The test first clicks:
+
+```tsx
+habit-delete-drink-water
+```
+
+That should not call `onDelete`.
+
+Instead, the card should reveal the confirmation UI.
+
+Then the test clicks:
+
+```tsx
+confirm-delete-button
+```
+
+Only this second explicit action should call `onDelete`.
+
+That proves deletion requires confirmation, as the TRD demands.
+
+#### Toggle Completion Test
+
+Required title:
+
+```tsx
+it("toggles completion and updates the streak display", async () => {
+```
+
+This test uses a small `HabitCompletionHarness`.
+
+The harness stores one habit in React state.
+
+The habit starts with an empty `completions` array.
+
+The card receives the fixed date `2026-04-29`.
+
+Before clicking complete, the streak test ID should contain:
+
+```txt
+0 day streak
+```
+
+The test clicks:
+
+```tsx
+habit-complete-drink-water
+```
+
+The harness calls:
+
+```tsx
+toggleHabitCompletion(currentHabit, today)
+```
+
+That is the real TRD helper.
+
+The helper adds today's date.
+
+React state updates.
+
+The card rerenders.
+
+The streak text becomes:
+
+```txt
+1 day streak
+```
+
+The completion button text becomes:
+
+```txt
+Completed
+```
+
+That proves the UI updates immediately after toggling completion.
+
+It also proves the card uses the shared streak helper instead of hardcoded
+streak text.
+
 ## Current Remaining Work
 
 ## `src/components/shared/SplashScreen.tsx`
