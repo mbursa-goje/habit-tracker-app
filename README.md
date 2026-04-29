@@ -170,6 +170,9 @@ and immutability.
 `tests/unit/storage.test.tsx` verifies the `useSyncExternalStore` localStorage
 bridge and same-tab subscription behavior.
 
+`tests/unit/auth.test.ts` verifies shared auth helpers, session shape guards,
+stored user reads, and storage key constants.
+
 `tests/integration/auth-flow.test.tsx` verifies signup, duplicate signup,
 login, invalid login, session creation, and localStorage auth behavior.
 

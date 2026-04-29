@@ -1363,6 +1363,34 @@ The storage tests cover:
 - notifying same-tab subscribers
 - re-rendering subscribed React components
 
+### `tests/unit/auth.test.ts`
+
+Purpose: test shared auth helpers added during the cleanup pass.
+
+The test runs in jsdom because `getStoredUsers` reads localStorage.
+
+The stored-users test writes a TRD-shaped user array to:
+
+```txt
+habit-tracker-users
+```
+
+Then it expects `getStoredUsers()` to return that same array.
+
+The missing-storage test confirms the helper returns an empty array when the
+key is not present.
+
+The valid-session test confirms `isSession` accepts objects with string
+`userId` and string `email`.
+
+The invalid-session test confirms `isSession` rejects missing fields, wrong
+types, and `null`.
+
+The id test confirms `createUserId` returns a non-empty string.
+
+This file also imports `STORAGE_KEYS`, which keeps the constants file covered
+by the unit suite and prevents coverage from drifting near the TRD threshold.
+
 ## `next.config.ts`
 
 Purpose: keep Next.js and Turbopack pointed at this project folder.
