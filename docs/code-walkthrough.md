@@ -353,6 +353,92 @@ The auth pages use `min-h-screen` so the split card can center vertically.
 This keeps the empty-state card tall enough to occupy the section without
 creating a tiny card followed by a large trailing blank band.
 
+### CSS `clamp()` For Responsive Sizing
+
+`clamp()` is a CSS function for responsive values.
+
+It lets one CSS property have a minimum value, a flexible preferred value, and a
+maximum value.
+
+The pattern is:
+
+```css
+clamp(minimum, preferred, maximum)
+```
+
+Read it like this:
+
+```txt
+Use the preferred value, but never go below the minimum and never go above the maximum.
+```
+
+That makes `clamp()` useful when a design should grow with the viewport but not
+become too small or too large.
+
+In this project, Tailwind uses `clamp()` through arbitrary-value classes.
+
+Example:
+
+```tsx
+min-h-[clamp(260px,42vh,420px)]
+```
+
+`min-h-[...]` means Tailwind should generate a custom `min-height` value.
+
+`260px` is the smallest allowed minimum height.
+
+This protects the empty state from becoming too short on small screens.
+
+`42vh` is the preferred responsive value.
+
+`vh` means viewport height.
+
+`42vh` means 42 percent of the browser height.
+
+This lets the panel grow when the screen is taller.
+
+`420px` is the largest allowed minimum height.
+
+This prevents the empty state from becoming comically tall on large screens.
+
+So the browser chooses:
+
+```txt
+260px <= actual min-height <= 420px
+```
+
+while trying to stay near:
+
+```txt
+42vh
+```
+
+The same idea is used for empty-state top padding:
+
+```tsx
+pt-[clamp(56px,8vh,96px)]
+```
+
+`pt-[...]` means custom padding-top.
+
+`56px` is the smallest top padding.
+
+`8vh` lets the top padding grow with the viewport height.
+
+`96px` stops the padding from becoming excessive.
+
+This is why the empty-state message can sit lower and feel centered on larger
+screens without becoming badly spaced on small screens.
+
+`clamp()` is different from only using responsive prefixes like `sm:` or `md:`.
+
+Responsive prefixes jump between fixed values at breakpoints.
+
+`clamp()` changes fluidly between a minimum and maximum.
+
+That fluid behavior helps polish layouts where the awkward space changes
+gradually across screen sizes.
+
 `max-w-sm`, `max-w-[1000px]`, and similar classes cap how wide content can get.
 
 Max-width prevents forms from becoming too stretched on desktop.
