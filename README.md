@@ -1,6 +1,6 @@
 # Habit Tracker PWA
 
-Habit Tracker is a local-first Progressive Web App built for the Stage 3 TRD.
+Habit Tracker is a local-first Progressive Web App built for the HNG Stage 3 TRD.
 It lets a user sign up, log in, manage daily habits, complete or uncomplete
 habits for today, view streaks, reload without losing saved state, and load the
 cached app shell offline after the app has been opened once.

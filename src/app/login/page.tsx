@@ -66,7 +66,7 @@ export default function LoginPage() {
           </div>
 
           <footer className="mt-12 text-center text-xs text-slate-500 md:hidden">
-            <p>2024 Habit Tracker. Precision in growth.</p>
+            <p>2026 Habit Tracker. Precision in growth.</p>
             <div className="mt-5 flex justify-center gap-8">
               <span>Privacy</span>
               <span>Terms</span>

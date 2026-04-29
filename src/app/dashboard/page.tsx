@@ -105,10 +105,10 @@ export default function Dashboard() {
     activeCount === 0 ? 0 : Math.round((doneTodayCount / activeCount) * 100);
   const bestStreak = userHabits.length
     ? Math.max(
-        ...userHabits.map((habit) =>
-          calculateCurrentStreak(habit.completions, today),
-        ),
-      )
+      ...userHabits.map((habit) =>
+        calculateCurrentStreak(habit.completions, today),
+      ),
+    )
     : 0;
 
   function saveHabits(nextHabits: Habit[]) {
@@ -139,11 +139,11 @@ export default function Dashboard() {
       const nextHabits: Habit[] = habits.map((habit) =>
         habit.id === editingHabit.id
           ? {
-              ...habit,
-              name: values.name,
-              description: values.description,
-              frequency: values.frequency,
-            }
+            ...habit,
+            name: values.name,
+            description: values.description,
+            frequency: values.frequency,
+          }
           : habit,
       );
 
@@ -205,11 +205,10 @@ export default function Dashboard() {
               key={item.name}
               type="button"
               onClick={item.name === "Add" ? openCreateForm : undefined}
-              className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${
-                item.active
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-50"
-              }`}
+              className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${item.active
+                ? "bg-blue-50 text-blue-700"
+                : "text-slate-600 hover:bg-slate-50"
+                }`}
             >
               <item.icon size={18} />
               {item.name}
@@ -272,27 +271,36 @@ export default function Dashboard() {
           <div className="space-y-4 lg:col-span-2">
             {isFormOpen && (
               <HabitForm
-                key={editingHabit?.id ?? "new-habit"}
-                habit={editingHabit}
-                onSave={handleSaveHabit}
-                onCancel={closeHabitForm}
-              />
+              key={editingHabit?.id ?? "new-habit"}
+              habit={editingHabit ?? undefined}
+              today={today}
+              mode={editingHabit ? "edit" : "create"}
+              onSave={handleSaveHabit}
+              onDiscard={closeHabitForm}
+              onDelete={
+                editingHabit
+                  ? () => {
+                      handleDeleteHabit(editingHabit.id);
+                      closeHabitForm();
+                    }
+                  : undefined
+              }
+            />
             )}
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
+            <div className="rounded-2xl border border-blue-500 bg-white p-5">
+              <div className="grid grid-cols-2 items-center gap-4 md:grid-cols-4">
                 <div className="flex items-center gap-4 md:col-span-1">
                   <div
-                    className="grid h-24 w-24 place-items-center rounded-full"
+                    className="grid h-24 w-24 place-items-center rounded-full p-5"
                     style={{
-                      background: `conic-gradient(#1d4ed8 ${
-                        progressPercent * 3.6
-                      }deg, #e2e8f0 0deg)`,
+                      background: `conic-gradient(#1d4ed8 ${progressPercent * 3.6
+                        }deg, #e2e8f0 0deg)`,
                     }}
                   >
                     <div className="grid h-20 w-20 place-items-center rounded-full bg-white">
                       <div className="text-center">
-                        <p className="text-4xl font-black text-slate-900">
+                        <p className="text-2xl font-black text-slate-700">
                           {progressPercent}%
                         </p>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -307,7 +315,7 @@ export default function Dashboard() {
                   <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
                     Completed
                   </p>
-                  <p className="mt-1 text-4xl font-extrabold text-slate-900">
+                  <p className="mt-1 text-2xl font-extrabold text-slate-900">
                     {doneTodayCount}/{activeCount}
                   </p>
                 </div>
@@ -316,7 +324,7 @@ export default function Dashboard() {
                   <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
                     Active
                   </p>
-                  <p className="mt-1 text-4xl font-extrabold text-slate-900">
+                  <p className="mt-1 text-2xl font-extrabold text-slate-900">
                     {activeCount}
                   </p>
                 </div>
@@ -325,7 +333,7 @@ export default function Dashboard() {
                   <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
                     Best Streak
                   </p>
-                  <p className="mt-1 text-4xl font-extrabold text-slate-900">
+                  <p className="mt-1 text-2xl font-extrabold text-slate-900">
                     {bestStreak} Days
                   </p>
                 </div>
