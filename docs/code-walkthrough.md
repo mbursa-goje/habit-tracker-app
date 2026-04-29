@@ -105,6 +105,276 @@ The body should explain what and why.
 
 The footer can mention TRD alignment, issue references, or breaking changes.
 
+## `package.json` Test Scripts
+
+Purpose: expose the exact test script names required by the TRD.
+
+```json
+"test:unit": "vitest run --coverage tests/unit"
+```
+
+This runs the unit test suite.
+
+`vitest run` executes tests once and exits.
+
+`--coverage` generates a coverage report.
+
+`tests/unit` limits this script to unit tests.
+
+The TRD requires unit coverage for files inside `src/lib`.
+
+```json
+"test:integration": "vitest run tests/integration"
+```
+
+This reserves the required integration test script name.
+
+The integration tests will cover auth and habit component flows.
+
+They are separate from unit tests because they render components and interact
+with UI state.
+
+```json
+"test:e2e": "playwright test"
+```
+
+This reserves the required end-to-end test script name.
+
+Playwright will later drive the browser through real routes.
+
+```json
+"test": "npm run test:unit && npm run test:integration && npm run test:e2e"
+```
+
+This runs all required test groups in order.
+
+The command stops if any earlier group fails.
+
+That is useful because unit failures should be fixed before slower browser
+tests run.
+
+## `vitest.config.ts`
+
+Purpose: configure Vitest for TypeScript path aliases and coverage.
+
+```ts
+import path from "node:path";
+```
+
+This imports Node's built-in path module.
+
+The config uses it to build an absolute path to `src`.
+
+```ts
+import { defineConfig } from "vitest/config";
+```
+
+`defineConfig` gives TypeScript-aware config completion and checking.
+
+```ts
+export default defineConfig({
+```
+
+This exports the Vitest configuration object.
+
+Vitest reads this file before running tests.
+
+```ts
+resolve: {
+  alias: {
+    "@": path.resolve(__dirname, "src"),
+  },
+},
+```
+
+This teaches Vitest the same `@/*` alias used by the app.
+
+Without this, files like `src/lib/habits.ts` could fail when they import
+`@/types/habit`.
+
+`path.resolve(__dirname, "src")` points `@` at the local `src` folder.
+
+```ts
+test: {
+  coverage: {
+    include: ["src/lib/**/*.ts"],
+    provider: "v8",
+    thresholds: {
+      lines: 80,
+    },
+  },
+},
+```
+
+`coverage` configures coverage reporting.
+
+`include` limits the coverage target to library TypeScript files.
+
+That matches the TRD coverage requirement for `src/lib`.
+
+`provider: "v8"` uses V8's native coverage engine.
+
+`thresholds.lines: 80` fails the unit test command when line coverage is below
+80%.
+
+## Unit Tests
+
+The unit tests verify pure utility behavior before we test full app flows.
+
+Each required test file uses the exact describe block and exact test titles
+from the TRD.
+
+Exact titles matter because mentors may inspect console output.
+
+### `tests/unit/slug.test.ts`
+
+Purpose: test `getHabitSlug`.
+
+```ts
+import { describe, expect, it } from "vitest";
+```
+
+`describe` groups related tests.
+
+`it` defines one test case.
+
+`expect` makes assertions.
+
+```ts
+import { getHabitSlug } from "../../src/lib/slug";
+```
+
+This imports the real slug helper.
+
+The test does not duplicate the implementation.
+
+```ts
+describe("getHabitSlug", () => {
+```
+
+This describe block name is required by the TRD.
+
+```ts
+it("returns lowercase hyphenated slug for a basic habit name", () => {
+  expect(getHabitSlug("Drink Water")).toBe("drink-water");
+});
+```
+
+This proves normal habit names become lowercase hyphenated slugs.
+
+`Drink Water` becomes `drink-water`.
+
+```ts
+it("trims outer spaces and collapses repeated internal spaces", () => {
+  expect(getHabitSlug("   Read    Books   ")).toBe("read-books");
+});
+```
+
+This proves leading/trailing spaces are removed.
+
+It also proves repeated internal spaces collapse to one hyphen.
+
+```ts
+it("removes non alphanumeric characters except hyphens", () => {
+  expect(getHabitSlug("Run! 5K - Daily?")).toBe("run-5k---daily");
+});
+```
+
+This proves punctuation is removed.
+
+The existing hyphen is preserved because the TRD allows hyphens.
+
+### `tests/unit/validators.test.ts`
+
+Purpose: test `validateHabitName`.
+
+The first test passes only spaces.
+
+The validator trims those spaces to an empty string.
+
+It must return `Habit name is required`.
+
+The second test uses 61 characters.
+
+The TRD maximum is 60 characters.
+
+It must return `Habit name must be 60 characters or fewer`.
+
+The third test uses a valid name with outer spaces.
+
+It must return the trimmed value and `error: null`.
+
+### `tests/unit/streaks.test.ts`
+
+Purpose: test `calculateCurrentStreak`.
+
+```ts
+/* MENTOR_TRACE_STAGE3_HABIT_A91 */
+```
+
+This marker is required by the TRD instructions for this specific file.
+
+It is placed immediately above the describe block.
+
+The empty completions test proves no completions produce a zero streak.
+
+The missing-today test proves yesterday alone does not count as a current
+streak.
+
+The consecutive-days test proves the function counts backward from today.
+
+The duplicate-date test proves duplicates do not inflate the streak.
+
+The missing-calendar-day test proves a gap breaks the streak.
+
+### `tests/unit/habits.test.ts`
+
+Purpose: test `toggleHabitCompletion`.
+
+`createHabit` builds a valid TRD habit object for tests.
+
+That keeps every test focused on one behavior.
+
+The add test proves a missing date is added.
+
+The remove test proves an existing date is removed.
+
+The immutability test proves the original habit object is not mutated.
+
+The duplicate test proves returned completions are unique and sorted.
+
+### `tests/unit/storage.test.tsx`
+
+Purpose: test the `useSyncExternalStore` localStorage bridge.
+
+The file uses:
+
+```ts
+// @vitest-environment jsdom
+```
+
+This tells Vitest to run this file in a browser-like DOM environment.
+
+The storage helper needs `window` and `localStorage`.
+
+The `StoredCount` test component calls `useLocalStorageValue`.
+
+It renders the current `counter` value.
+
+The test wraps `setLocalStorageValue` in `act`.
+
+`act` tells React to flush updates caused by the external store write before
+the assertion runs.
+
+The storage tests cover:
+
+- fallback when a key is missing
+- fallback when JSON is invalid
+- writing JSON values
+- removing stored values
+- notifying same-tab subscribers
+- re-rendering subscribed React components
+
 ## `next.config.ts`
 
 Purpose: keep Next.js and Turbopack pointed at this project folder.
