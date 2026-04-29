@@ -68,6 +68,1031 @@ based on the URL.
 
 `page.tsx` files should contain route-specific behavior.
 
+## Next.js From Scratch For This Project
+
+Purpose: explain the Next.js pieces used by this app from first principles.
+
+This section is based on the local Next.js documentation inside:
+
+```txt
+node_modules/next/dist/docs/
+```
+
+The most relevant local docs for this project are:
+
+- `01-app/01-getting-started/02-project-structure.md`
+- `01-app/01-getting-started/03-layouts-and-pages.md`
+- `01-app/01-getting-started/04-linking-and-navigating.md`
+- `01-app/01-getting-started/05-server-and-client-components.md`
+- `01-app/01-getting-started/14-metadata-and-og-images.md`
+- `01-app/03-api-reference/04-functions/use-router.md`
+
+### What Next.js Is Doing Here
+
+Next.js is the application framework.
+
+React is the UI library.
+
+TypeScript is the type-checking layer.
+
+Tailwind CSS is the utility-class styling layer.
+
+Next.js connects those pieces into a web application with:
+
+- file-based routing
+- server rendering
+- client hydration
+- build tooling
+- static asset serving
+- metadata handling
+- development server
+- production build output
+
+In this project, Next.js is not being used for a backend database.
+
+In this project, Next.js is not being used for remote authentication.
+
+The TRD says persistence must stay local and deterministic.
+
+That is why the app stores users, sessions, and habits in `localStorage`.
+
+### File-Based Routing
+
+Next.js App Router uses file-system routing.
+
+File-system routing means folders and files create URLs.
+
+You do not create a central route table manually.
+
+You do not write something like:
+
+```ts
+routes["/login"] = LoginPage;
+```
+
+Instead, Next.js reads the folder structure under `src/app`.
+
+The special file name `page.tsx` makes a route public.
+
+The folder path around `page.tsx` becomes the URL.
+
+In this project:
+
+```txt
+src/app/page.tsx
+```
+
+maps to:
+
+```txt
+/
+```
+
+This is the root route.
+
+```txt
+src/app/login/page.tsx
+```
+
+maps to:
+
+```txt
+/login
+```
+
+```txt
+src/app/signup/page.tsx
+```
+
+maps to:
+
+```txt
+/signup
+```
+
+```txt
+src/app/dashboard/page.tsx
+```
+
+maps to:
+
+```txt
+/dashboard
+```
+
+That is page routing.
+
+Page routing is the process of matching the browser URL to a route segment and
+rendering the `page.tsx` file for that segment.
+
+If the user enters `http://localhost:3000/login`, Next.js looks for:
+
+```txt
+src/app/login/page.tsx
+```
+
+If the user enters `http://localhost:3000/dashboard`, Next.js looks for:
+
+```txt
+src/app/dashboard/page.tsx
+```
+
+The route is public only because a `page.tsx` file exists in that folder.
+
+A folder without `page.tsx` can organize files but does not automatically
+become a public page.
+
+### Route Segments
+
+The local Next docs describe routes as segments.
+
+A segment is one part of a URL.
+
+For `/dashboard`, the segment is:
+
+```txt
+dashboard
+```
+
+For `/login`, the segment is:
+
+```txt
+login
+```
+
+For `/`, there is no child segment.
+
+It is the root segment.
+
+This app currently has simple static segments.
+
+It does not currently use dynamic segments like:
+
+```txt
+src/app/habits/[slug]/page.tsx
+```
+
+A dynamic segment uses square brackets.
+
+That would match URLs such as:
+
+```txt
+/habits/drink-water
+```
+
+We discussed that idea earlier for habit detail pages, but the current TRD
+implementation keeps habit create, edit, delete, and complete behavior on the
+dashboard.
+
+### Layouts
+
+Next.js uses `layout.tsx` for UI shared by routes.
+
+This project has:
+
+```txt
+src/app/layout.tsx
+```
+
+That file is the root layout.
+
+The root layout is required in the App Router.
+
+The root layout must return:
+
+```tsx
+<html>
+  <body>{children}</body>
+</html>
+```
+
+`children` means "the active route page goes here."
+
+When the user visits `/login`, `children` is the login page.
+
+When the user visits `/signup`, `children` is the signup page.
+
+When the user visits `/dashboard`, `children` is the dashboard page.
+
+This project's layout also imports global CSS.
+
+It also exports metadata.
+
+It also renders `ServiceWorkerRegistration`.
+
+Those things belong in the root layout because they apply across the whole app.
+
+### Pages
+
+A page is route-specific UI.
+
+The local Next docs define a page as UI rendered on a specific route.
+
+Every route page must default export a React component.
+
+This project's pages are:
+
+- `src/app/page.tsx`
+- `src/app/login/page.tsx`
+- `src/app/signup/page.tsx`
+- `src/app/dashboard/page.tsx`
+
+Each page owns its route-level responsibility.
+
+The root page owns the boot splash and redirect decision.
+
+The login page owns the login screen layout.
+
+The signup page owns the signup screen layout.
+
+The dashboard page owns protected habit management.
+
+### Server Components
+
+In the App Router, pages and layouts are Server Components by default.
+
+Server Components run on the server side of the framework.
+
+Server Components can reduce client JavaScript.
+
+Server Components can fetch server data without exposing secrets to the
+browser.
+
+Server Components cannot use browser-only APIs.
+
+Server Components cannot use `localStorage`.
+
+Server Components cannot use `window`.
+
+Server Components cannot use `navigator`.
+
+Server Components cannot use React state hooks like `useState`.
+
+Server Components cannot attach event handlers like `onClick`.
+
+This app is localStorage-heavy.
+
+That means several files must be Client Components.
+
+### Client Components
+
+Client Components run in the browser after hydration.
+
+The local Next docs say to use Client Components when you need:
+
+- state
+- event handlers
+- lifecycle effects
+- browser APIs
+- custom hooks
+
+Client Components are marked with:
+
+```tsx
+"use client";
+```
+
+This directive must be at the top of the file before imports.
+
+Once a file is marked `"use client"`, that file and its imports become part of
+the client bundle.
+
+That is why we should not mark everything as client by habit.
+
+We mark a file as client only when it needs client behavior.
+
+### Client Components In This Project
+
+`src/app/page.tsx` is a Client Component.
+
+It uses `useEffect`.
+
+It uses `useRouter`.
+
+It reads localStorage through the storage helper.
+
+It waits 1200ms, then redirects to `/dashboard` or `/login`.
+
+`src/app/login/page.tsx` is a Client Component.
+
+It renders interactive login UI.
+
+It imports `LoginForm`, which uses state and localStorage.
+
+`src/app/signup/page.tsx` is a Client Component.
+
+It renders interactive signup UI.
+
+It imports `SignupForm`, which uses state and localStorage.
+
+`src/app/dashboard/page.tsx` is a Client Component.
+
+It reads session and habit data from localStorage.
+
+It opens and closes forms.
+
+It creates, edits, deletes, and toggles habits.
+
+It logs the user out.
+
+All of that requires browser-side interactivity.
+
+`src/components/auth/LoginForm.tsx` is a Client Component.
+
+It tracks form input with `useState`.
+
+It handles submit events.
+
+It reads users from localStorage.
+
+It writes the session to localStorage.
+
+`src/components/auth/SignupForm.tsx` is a Client Component.
+
+It tracks signup form fields.
+
+It checks duplicate emails.
+
+It writes users and session data.
+
+`src/components/habits/HabitForm.tsx` is a Client Component.
+
+It tracks habit form state.
+
+It validates the name before saving.
+
+It reacts when the parent switches between create and edit mode.
+
+`src/components/habits/HabitCard.tsx` is a Client Component.
+
+It holds temporary delete-confirmation state.
+
+It exposes edit, delete, and completion buttons.
+
+`src/components/shared/ServiceWorkerRegistration.tsx` is a Client Component.
+
+It uses the browser `navigator.serviceWorker` API.
+
+`src/lib/storage.ts` is marked `"use client"`.
+
+It uses `window`, `localStorage`, `CustomEvent`, and React's
+`useSyncExternalStore`.
+
+### Server Components In This Project
+
+`src/app/layout.tsx` is a Server Component by default.
+
+It does not have `"use client"`.
+
+That is correct.
+
+It exports metadata.
+
+Next metadata exports belong in Server Components.
+
+It renders the client `ServiceWorkerRegistration` component as a child.
+
+That is allowed.
+
+A Server Component can render a Client Component.
+
+The boundary starts at the Client Component.
+
+### Hydration
+
+Hydration is React attaching interactivity to HTML that was already rendered.
+
+Next can send initial HTML to the browser.
+
+That HTML appears before React event handlers are active.
+
+Then the browser downloads JavaScript.
+
+React hydrates the page.
+
+After hydration, buttons, input handlers, effects, and client state work.
+
+Hydration matters in this project because localStorage only exists in the
+browser.
+
+The server cannot read localStorage.
+
+So a route like `/dashboard` can initially render before the client has read
+the stored session.
+
+That is why dashboard has a hydration gate:
+
+```tsx
+const [hasCheckedClientStorage, setHasCheckedClientStorage] = useState(false);
+```
+
+The gate prevents a false redirect to `/login` before the client snapshot is
+ready.
+
+### Navigation
+
+Next.js supports client-side navigation.
+
+Client-side navigation means changing routes without doing a full page reload.
+
+The preferred component for ordinary navigation is:
+
+```tsx
+import Link from "next/link";
+```
+
+This project uses `Link` in:
+
+- `LoginForm`
+- `SignupForm`
+
+The login form has a link to signup.
+
+The signup form has a link to login.
+
+`Link` lets Next prefetch and transition routes efficiently.
+
+For programmatic navigation, Next provides:
+
+```tsx
+import { useRouter } from "next/navigation";
+```
+
+This project uses `useRouter` in:
+
+```txt
+src/app/page.tsx
+```
+
+The root route needs a delayed redirect after the splash screen.
+
+That is a specific requirement where programmatic navigation makes sense.
+
+The root page uses:
+
+```tsx
+router.replace(...)
+```
+
+`replace` changes the URL without adding the splash page to browser history.
+
+That means Back does not send the user back into the splash redirect loop.
+
+Some auth flows use:
+
+```tsx
+window.location.href = "/dashboard";
+```
+
+That is a full browser navigation.
+
+It is simple and deterministic for localStorage auth.
+
+The tests use an optional redirect callback to observe that redirect without
+forcing jsdom to navigate.
+
+### Metadata
+
+Next metadata is configured in:
+
+```txt
+src/app/layout.tsx
+```
+
+The app exports:
+
+```tsx
+export const metadata: Metadata = {
+  title: "Habit Tracker",
+  description: "Track daily habits with local-first progress persistence.",
+  manifest: "/manifest.json",
+};
+```
+
+`title` controls the document title.
+
+`description` controls the page description metadata.
+
+`manifest` links the PWA manifest.
+
+The local Next docs say metadata exports are supported from Server Components.
+
+That is why the root layout remains a Server Component.
+
+### Static Assets
+
+Next serves files in:
+
+```txt
+public/
+```
+
+from the site root.
+
+This project uses:
+
+```txt
+public/manifest.json
+```
+
+which is served as:
+
+```txt
+/manifest.json
+```
+
+This project uses:
+
+```txt
+public/sw.js
+```
+
+which is served as:
+
+```txt
+/sw.js
+```
+
+This project uses:
+
+```txt
+public/icons/icon-192.png
+public/icons/icon-512.png
+```
+
+which are served as:
+
+```txt
+/icons/icon-192.png
+/icons/icon-512.png
+```
+
+### `next.config.ts`
+
+Purpose: configure Next.js itself.
+
+```ts
+import type { NextConfig } from "next";
+```
+
+This imports the TypeScript type for the config object.
+
+```ts
+import path from "node:path";
+```
+
+This imports Node's path helper.
+
+```ts
+const nextConfig: NextConfig = {
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
+};
+```
+
+`nextConfig` is the configuration object.
+
+`turbopack.root` tells Turbopack the exact project root.
+
+This matters because the environment had another lockfile above the project.
+
+Without an explicit root, Next/Turbopack could infer the wrong workspace root.
+
+That caused it to look outside the project folder.
+
+The explicit root keeps the compiler focused on:
+
+```txt
+C:\Users\HP\Desktop\habit-tracker-app
+```
+
+```ts
+export default nextConfig;
+```
+
+This exports the config so Next can read it.
+
+### `tsconfig.json`
+
+Purpose: configure TypeScript for the app.
+
+Important settings for this project:
+
+```json
+"strict": true
+```
+
+This enables stricter type checking.
+
+It helps catch shape mismatches with TRD types.
+
+```json
+"jsx": "react-jsx"
+```
+
+This configures JSX transform behavior for React.
+
+```json
+"moduleResolution": "bundler"
+```
+
+This aligns module resolution with modern bundler behavior.
+
+```json
+"paths": {
+  "@/*": ["./src/*"]
+}
+```
+
+This creates the `@` import alias.
+
+So this:
+
+```ts
+import type { Habit } from "@/types/habit";
+```
+
+means:
+
+```txt
+src/types/habit
+```
+
+This keeps imports shorter and avoids fragile `../../../` paths in app code.
+
+### `src/app/globals.css`
+
+Purpose: load global styles.
+
+```css
+@import "tailwindcss";
+```
+
+This loads Tailwind CSS.
+
+Without this line, Tailwind utility classes would not apply.
+
+Earlier, missing Tailwind import caused styles like blue backgrounds and sizing
+utilities to appear broken.
+
+```css
+@layer base {
+  html {
+    font-family: "Google Sans", sans-serif;
+  }
+}
+```
+
+This sets a global base font family.
+
+It affects every route because `globals.css` is imported in the root layout.
+
+### React Hook: `useState`
+
+`useState` stores component-local state.
+
+State is data that affects rendering and can change over time.
+
+The shape is:
+
+```tsx
+const [value, setValue] = useState(initialValue);
+```
+
+`value` is the current state.
+
+`setValue` updates the state.
+
+Calling `setValue` tells React to rerender the component.
+
+In `LoginForm`, `useState` stores:
+
+- `email`
+- `password`
+- `rememberMe`
+- `error`
+
+When the user types in the email input, `setEmail(...)` updates state.
+
+React rerenders the input with the latest value.
+
+In `SignupForm`, `useState` stores:
+
+- `email`
+- `password`
+- `error`
+
+In `HabitForm`, `useState` stores:
+
+- `name`
+- `description`
+- `error`
+
+In `HabitCard`, `useState` stores:
+
+- `isConfirmingDelete`
+
+That state is intentionally temporary.
+
+It controls whether the confirmation panel is visible.
+
+It is not saved to localStorage.
+
+In `Dashboard`, `useState` stores:
+
+- `hasCheckedClientStorage`
+- `isFormOpen`
+- `editingHabit`
+
+`hasCheckedClientStorage` prevents premature auth redirects during hydration.
+
+`isFormOpen` controls whether the habit form appears.
+
+`editingHabit` decides whether the form is in create mode or edit mode.
+
+### React Hook: `useEffect`
+
+`useEffect` runs side effects after render.
+
+A side effect is work that touches something outside the render calculation.
+
+Examples:
+
+- timers
+- browser APIs
+- subscriptions
+- redirects
+- service worker registration
+- syncing local component state from props
+
+The shape is:
+
+```tsx
+useEffect(() => {
+  // side effect
+  return () => {
+    // optional cleanup
+  };
+}, [dependencies]);
+```
+
+The dependency array controls when the effect reruns.
+
+An empty array means the effect runs once after mount.
+
+In `src/app/page.tsx`, `useEffect` starts a timer.
+
+The timer keeps the splash screen visible for 1200ms.
+
+After the timer, the effect checks session storage and redirects.
+
+The cleanup clears the timer if the page unmounts early.
+
+In `Dashboard`, one `useEffect` sets:
+
+```tsx
+setHasCheckedClientStorage(true);
+```
+
+That marks that the first client-side storage check has happened.
+
+Another dashboard `useEffect` handles auth protection.
+
+It redirects to `/login` when there is no valid session after the storage check.
+
+In `HabitForm`, `useEffect` responds when the `habit` prop changes.
+
+If the user switches from editing one habit to editing another, the form fields
+need to update.
+
+That effect resets:
+
+- `name`
+- `description`
+- `error`
+
+In `ServiceWorkerRegistration`, `useEffect` registers `/sw.js`.
+
+It waits until the component is mounted in the browser.
+
+That is necessary because `navigator.serviceWorker` does not exist on the
+server.
+
+### React Hook: `useMemo`
+
+`useMemo` memoizes a calculated value.
+
+Memoization means React can reuse a previous calculation until dependencies
+change.
+
+The shape is:
+
+```tsx
+const value = useMemo(() => calculateValue(), [dependencies]);
+```
+
+In `Dashboard`, `useMemo` calculates:
+
+```tsx
+const userHabits = useMemo(
+  () => habits.filter((habit) => habit.userId === session?.userId),
+  [habits, session?.userId],
+);
+```
+
+This filters all stored habits down to the active user's habits.
+
+The calculation reruns only when:
+
+- the full `habits` array changes
+- the active `session.userId` changes
+
+This is a good fit because user-specific filtering is a derived value.
+
+It should not be stored separately.
+
+It should be calculated from source-of-truth storage.
+
+In `src/lib/storage.ts`, `useMemo` parses the localStorage snapshot:
+
+```tsx
+return useMemo(
+  () => parseSnapshot(snapshot, fallback),
+  [fallback, snapshot],
+);
+```
+
+This avoids reparsing JSON unless the stored string or fallback changes.
+
+### React Hook: `useSyncExternalStore`
+
+`useSyncExternalStore` connects React to state that lives outside React.
+
+localStorage is outside React.
+
+React does not automatically know when localStorage changes.
+
+That is why this project uses `useSyncExternalStore` in:
+
+```txt
+src/lib/storage.ts
+```
+
+The shape is:
+
+```tsx
+const snapshot = useSyncExternalStore(
+  subscribe,
+  getSnapshot,
+  getServerSnapshot,
+);
+```
+
+`subscribe` tells React how to listen for changes.
+
+`getSnapshot` tells React how to read the current client value.
+
+`getServerSnapshot` tells React what value to use during server rendering.
+
+This project uses:
+
+```tsx
+(onStoreChange) => subscribeToLocalStorageKey(key, onStoreChange)
+```
+
+That subscribes to one storage key.
+
+It listens to the browser `storage` event.
+
+It also listens to the custom same-tab event.
+
+The browser `storage` event is mainly for other tabs.
+
+Same-tab writes do not reliably trigger `storage`.
+
+So `setLocalStorageValue` dispatches:
+
+```ts
+new CustomEvent("habit-tracker-storage", { detail: { key } })
+```
+
+That lets components in the same tab update immediately.
+
+`getSnapshotForKey(key)` reads:
+
+```ts
+window.localStorage.getItem(key)
+```
+
+That gives React the raw stored string.
+
+`parseSnapshot` converts that string into typed JSON data.
+
+This design makes localStorage feel like reactive state while still keeping the
+TRD-required persistence layer.
+
+### Next Hook: `useRouter`
+
+`useRouter` comes from:
+
+```tsx
+import { useRouter } from "next/navigation";
+```
+
+The local Next docs say App Router projects should import it from
+`next/navigation`, not `next/router`.
+
+`useRouter` is only for Client Components.
+
+It lets code change routes programmatically.
+
+This project uses it in:
+
+```txt
+src/app/page.tsx
+```
+
+The root route needs to:
+
+1. show splash immediately
+2. wait between 800ms and 2000ms
+3. inspect session storage
+4. redirect to `/dashboard` or `/login`
+
+That is not a normal clickable link.
+
+That is programmatic navigation.
+
+So `useRouter` is appropriate.
+
+The root route uses:
+
+```tsx
+router.replace(hasStoredSession() ? "/dashboard" : "/login");
+```
+
+`replace` navigates without adding the current route to browser history.
+
+That is better than `push` for splash boot behavior.
+
+### How The Pieces Work Together
+
+When a new unauthenticated user opens `/`:
+
+1. Next matches `src/app/page.tsx`.
+2. The root layout wraps the page.
+3. The splash screen renders immediately.
+4. The client effect waits 1200ms.
+5. The app finds no valid session.
+6. `router.replace("/login")` runs.
+7. Next renders `src/app/login/page.tsx`.
+8. The user sees `LoginForm`.
+
+When a user signs up:
+
+1. Next renders `src/app/signup/page.tsx`.
+2. `SignupForm` tracks input state with `useState`.
+3. Submit reads `habit-tracker-users`.
+4. Duplicate email is rejected if found.
+5. A TRD-shaped user is saved.
+6. A TRD-shaped session is saved.
+7. The browser navigates to `/dashboard`.
+8. Dashboard reads session through `useLocalStorageValue`.
+9. Dashboard renders protected content.
+
+When a user creates a habit:
+
+1. Dashboard opens `HabitForm`.
+2. `HabitForm` tracks name and description with `useState`.
+3. Submit calls `validateHabitName`.
+4. Dashboard builds a TRD-shaped `Habit`.
+5. Dashboard writes `habit-tracker-habits`.
+6. `useSyncExternalStore` hears the storage update.
+7. Dashboard rerenders.
+8. `userHabits` recalculates.
+9. `HabitCard` appears with slug-based test IDs.
+
+When a user completes a habit:
+
+1. The user clicks `habit-complete-{slug}`.
+2. Dashboard calls `toggleHabitCompletion`.
+3. The helper adds today's `YYYY-MM-DD` date.
+4. Dashboard writes the updated habits array.
+5. `useSyncExternalStore` notifies subscribers.
+6. Dashboard rerenders.
+7. `HabitCard` recalculates streak.
+8. The visible streak updates immediately.
+
+When the app loads offline after one online load:
+
+1. `ServiceWorkerRegistration` registers `/sw.js`.
+2. The service worker caches shell routes and successful GET responses.
+3. The browser goes offline.
+4. Navigation or reload requests hit the service worker.
+5. Cached responses are returned.
+6. The app shell renders instead of hard-crashing.
+
 ## `package.json` Test Scripts
 
 Purpose: expose the exact test script names required by the TRD.
