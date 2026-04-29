@@ -201,8 +201,8 @@ export default function HabitForm({
         </div>
       </form>
 
-      <aside className="space-y-5">
-        <section className="rounded-lg border border-slate-200 bg-white p-5">
+      <aside className="h-full">
+        <section className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-5">
           <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
             Performance Summary
           </h3>

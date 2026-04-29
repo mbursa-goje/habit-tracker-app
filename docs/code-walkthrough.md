@@ -358,6 +358,96 @@ This layout uses available desktop width more intentionally.
 
 It also keeps mobile simple because the base layout is still one column.
 
+### Empty And Right Rail Space Management
+
+The dashboard also manages vertical empty space on larger screens.
+
+The empty state uses:
+
+```tsx
+flex min-h-[clamp(220px,34vh,360px)] flex-col items-center justify-center
+```
+
+`flex` creates a flexible container.
+
+`flex-col` stacks the title, helper text, and button vertically.
+
+`items-center` centers the content horizontally.
+
+`justify-center` centers the content vertically.
+
+`min-h-[clamp(220px,34vh,360px)]` gives the empty state a responsive minimum
+height.
+
+`clamp(...)` means the height has a lower bound, a preferred viewport-relative
+size, and an upper bound.
+
+`220px` is the smallest allowed height.
+
+`34vh` lets the panel grow with the viewport.
+
+`360px` prevents the panel from becoming overly tall.
+
+This avoids a tiny empty-state card followed by a large blank band.
+
+The dashboard right rail uses:
+
+```tsx
+flex h-full flex-col gap-5
+```
+
+`flex` turns the right rail into a vertical flex container.
+
+`h-full` lets it stretch to the height of the grid row.
+
+`flex-col` stacks Daily Insight, Weekly Consistency, and Next Up.
+
+`gap-5` preserves the spacing between rail cards.
+
+The Next Up card uses:
+
+```tsx
+flex min-h-36 flex-1 flex-col justify-center
+```
+
+`flex-1` lets it occupy remaining vertical space in the right rail.
+
+`min-h-36` keeps it from becoming too short.
+
+`justify-center` centers its content vertically inside the stretched card.
+
+This reduces the trailing space below Next Up when the left habit content is
+taller than the right rail cards.
+
+The dashboard summary metric tiles use:
+
+```tsx
+flex min-h-20 flex-col items-center justify-center text-center
+```
+
+`items-center` centers the label/value stack horizontally.
+
+`justify-center` centers the label/value stack vertically.
+
+`text-center` centers the text itself.
+
+This keeps Completed, Active, and Best Streak visually balanced beside the
+progress ring.
+
+The habit form performance summary uses:
+
+```tsx
+aside className="h-full"
+section className="flex h-full flex-col ..."
+```
+
+`h-full` lets the summary column match the form column height.
+
+The section itself fills that column.
+
+That removes the short-card effect where the performance summary ended early
+and left a blank right-side area in create/edit mode.
+
 ### Dashboard Summary Ring
 
 The dashboard progress ring was enlarged because the first version felt tight.

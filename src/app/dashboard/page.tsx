@@ -364,7 +364,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-blue-50 bg-blue-50/40 p-3 sm:p-4">
+                <div className="flex min-h-20 flex-col items-center justify-center rounded-2xl border border-blue-50 bg-blue-50/40 p-3 text-center sm:p-4">
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Completed
                   </p>
@@ -373,7 +373,7 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-blue-50 bg-blue-50/40 p-3 sm:p-4">
+                <div className="flex min-h-20 flex-col items-center justify-center rounded-2xl border border-blue-50 bg-blue-50/40 p-3 text-center sm:p-4">
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Active
                   </p>
@@ -382,7 +382,7 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-blue-50 bg-blue-50/40 p-3 sm:p-4">
+                <div className="flex min-h-20 flex-col items-center justify-center rounded-2xl border border-blue-50 bg-blue-50/40 p-3 text-center sm:p-4">
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Best Streak
                   </p>
@@ -408,7 +408,7 @@ export default function Dashboard() {
             {userHabits.length === 0 ? (
               <div
                 data-testid="empty-state"
-                className="rounded-3xl border border-dashed border-blue-200 bg-white p-8 text-center shadow-sm"
+                className="flex min-h-[clamp(220px,34vh,360px)] flex-col items-center justify-center rounded-3xl border border-dashed border-blue-200 bg-white p-8 text-center shadow-sm"
               >
                 <h3 className="text-xl font-bold text-slate-900">
                   No habits yet
@@ -438,7 +438,9 @@ export default function Dashboard() {
             )}
           </div>
 
-          <aside className={`space-y-5 ${isFormOpen ? "xl:hidden" : ""}`}>
+          <aside
+            className={`flex h-full flex-col gap-5 ${isFormOpen ? "xl:hidden" : ""}`}
+          >
             <div className="overflow-hidden rounded-3xl border border-blue-100 bg-slate-900 p-5 text-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
               <div className="rounded-2xl bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.35),_rgba(15,23,42,0.85)_65%)] p-5">
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-blue-200">
@@ -475,7 +477,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="rounded-3xl bg-gradient-to-br from-blue-700 via-blue-700 to-blue-900 p-5 text-white shadow-[0_18px_50px_rgba(29,78,216,0.22)]">
+            <div className="flex min-h-36 flex-1 flex-col justify-center rounded-3xl bg-gradient-to-br from-blue-700 via-blue-700 to-blue-900 p-5 text-white shadow-[0_18px_50px_rgba(29,78,216,0.22)]">
               <p className="text-xs font-bold uppercase tracking-widest text-blue-200">
                 Next Up
               </p>

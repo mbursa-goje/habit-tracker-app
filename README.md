@@ -154,6 +154,9 @@ The dashboard keeps the TRD test IDs in place while adding user-facing polish:
 - Create/edit mode uses the full dashboard width on larger screens, and the
   habit form performance summary fills the remaining right-side space instead
   of leaving a short panel with unused space beside it.
+- Empty states, dashboard summary tiles, the habit form performance summary,
+  and the Next Up rail card use centered or stretched layouts to avoid awkward
+  trailing blank space on larger screens.
 - Developer-only helper copy such as the old Stage Scope card was removed from
   the visible product UI.
 
