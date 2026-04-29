@@ -50,6 +50,474 @@ The visual polish does not change authentication behavior.
 
 The visual polish does not rename required test IDs.
 
+## Tailwind Utility Glossary Used In This Project
+
+Purpose: explain the Tailwind utility classes that appear repeatedly in the
+auth pages, dashboard, habit cards, and habit form.
+
+Tailwind is a utility-first CSS system.
+
+Instead of writing a separate CSS class like:
+
+```css
+.dashboard-card {
+  display: grid;
+  padding: 1.25rem;
+}
+```
+
+the component writes small utility classes directly in `className`.
+
+Example:
+
+```tsx
+className="grid gap-5 rounded-3xl border border-blue-100 bg-white p-5"
+```
+
+Each utility controls one CSS idea.
+
+`grid` means `display: grid`.
+
+`gap-5` creates spacing between grid children.
+
+`rounded-3xl` creates a large border radius.
+
+`border` enables a 1px border.
+
+`border-blue-100` colors that border with a light blue.
+
+`bg-white` sets the background color to white.
+
+`p-5` adds padding on all sides.
+
+### Responsive Prefixes: `sm`, `md`, `lg`, `xl`, `2xl`
+
+Tailwind responsive prefixes apply a class only after a screen reaches a
+breakpoint.
+
+The app uses mobile-first styling.
+
+That means the unprefixed class is the default for small screens.
+
+Then prefixed classes progressively enhance the layout on wider screens.
+
+Example:
+
+```tsx
+className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px]"
+```
+
+`grid` enables CSS Grid.
+
+`grid-cols-1` makes one column by default.
+
+That is the mobile layout.
+
+`xl:grid-cols-[minmax(0,1fr)_320px]` changes the grid only on `xl` screens and
+above.
+
+That is the desktop layout.
+
+The first desktop column uses `minmax(0,1fr)`.
+
+`1fr` means it receives the flexible remaining width.
+
+`minmax(0,1fr)` prevents long content from forcing the column wider than the
+available space.
+
+The second desktop column uses `320px`.
+
+That creates a fixed right rail for summary cards.
+
+Example:
+
+```tsx
+className="p-5 sm:p-6"
+```
+
+`p-5` is the default padding.
+
+`sm:p-6` increases padding from the `sm` breakpoint upward.
+
+This is why cards can breathe more on larger screens without becoming cramped
+on 320px screens.
+
+Example:
+
+```tsx
+className="flex flex-col md:flex-row"
+```
+
+`flex` enables Flexbox.
+
+`flex-col` stacks children vertically by default.
+
+`md:flex-row` places children side by side on medium screens and above.
+
+This pattern is used when a card should stack on mobile but behave like a row
+on desktop.
+
+### Grid Utilities
+
+`grid` turns an element into a grid container.
+
+Grid is best when the layout needs rows and columns.
+
+The dashboard uses grid for page sections, metric tiles, and responsive card
+groups.
+
+`grid-cols-1` creates one equal-width column.
+
+`grid-cols-2` creates two equal-width columns.
+
+`sm:grid-cols-2` creates two columns only at the `sm` breakpoint and above.
+
+`xl:grid-cols-3` creates three columns only at the `xl` breakpoint and above.
+
+`gap-4`, `gap-5`, and `gap-6` set the spacing between grid items.
+
+`place-items-center` centers children both horizontally and vertically.
+
+It is shorthand for:
+
+```css
+align-items: center;
+justify-items: center;
+```
+
+The progress ring uses this idea so the percentage sits in the middle of the
+circle.
+
+`col-span-2` makes a grid item span two columns.
+
+`xl:col-span-2` makes that behavior happen only on extra-large screens.
+
+The project uses this when a main dashboard card should be wider than the
+neighboring side card.
+
+### Flex Utilities
+
+`flex` turns an element into a flex container.
+
+Flexbox is best when items need to sit in a row or column and align around one
+axis.
+
+`flex-col` stacks children vertically.
+
+`flex-row` places children horizontally.
+
+`items-center` aligns children vertically in a row layout.
+
+When the flex direction is column, `items-center` aligns children horizontally.
+
+`justify-center` centers children along the main axis.
+
+In a row, that means horizontal centering.
+
+In a column, that means vertical centering.
+
+`justify-between` pushes the first child to one side and the last child to the
+opposite side.
+
+The habit card top row uses this so the title sits left and the edit/delete
+buttons sit right.
+
+`flex-1` tells an item to occupy remaining available space.
+
+The project uses `flex-1` when a card or column should fill leftover height or
+width instead of leaving awkward empty space.
+
+`shrink-0` prevents an item from becoming smaller when the container is tight.
+
+This protects icon buttons, avatars, and fixed-width controls from being
+squeezed.
+
+`min-w-0` allows a flex child to shrink properly instead of overflowing because
+of long text.
+
+It is especially useful around habit names and descriptions.
+
+### Background Utilities And Gradients
+
+`bg-white` sets a white background.
+
+`bg-blue-50` sets a very light blue background.
+
+`bg-blue-600` sets a strong blue background.
+
+`bg-slate-50` sets a very light slate background.
+
+The app uses slate colors for calm neutral surfaces and blue colors for primary
+actions.
+
+Arbitrary hex colors use square brackets.
+
+Example:
+
+```tsx
+className="bg-[#f0f4ff]"
+```
+
+`bg-[#f0f4ff]` creates an exact custom background color.
+
+Square brackets tell Tailwind to generate a class for a custom CSS value.
+
+The same square-bracket pattern appears in shadows, radii, widths, heights, and
+grid templates.
+
+Example:
+
+```tsx
+className="bg-gradient-to-br from-blue-700 via-blue-700 to-blue-900"
+```
+
+`bg-gradient-to-br` creates a gradient that moves toward the bottom-right.
+
+`from-blue-700` is the starting color.
+
+`via-blue-700` is the middle color.
+
+`to-blue-900` is the ending color.
+
+The auth and dashboard surfaces use gradient-style thinking to make large blue
+areas feel intentional instead of flat.
+
+Example:
+
+```tsx
+className="bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.12),transparent_38%)]"
+```
+
+`bg-[...]` passes a custom `background-image` value to Tailwind.
+
+`radial-gradient(...)` creates a soft glow.
+
+`circle_at_top_left` positions the glow near the top-left.
+
+`rgba(37,99,235,0.12)` creates a transparent blue.
+
+`transparent_38%` fades the gradient out by 38%.
+
+Tailwind arbitrary values use underscores where normal CSS would use spaces.
+
+Tailwind converts those underscores back into spaces when generating CSS.
+
+### Spacing Utilities
+
+`p-4`, `p-5`, `p-6`, and `p-7` set padding on all sides.
+
+Padding is internal space.
+
+It keeps content away from the edges of a card.
+
+`px-4` sets horizontal padding.
+
+`py-3` sets vertical padding.
+
+`mt-4` sets margin-top.
+
+`mb-6` sets margin-bottom.
+
+`mx-auto` sets left and right margins to auto.
+
+That centers fixed-width blocks.
+
+`space-y-6` adds vertical spacing between direct children.
+
+The auth forms use this to keep input groups evenly separated.
+
+`gap-3` and `gap-4` are preferred inside grid and flex containers.
+
+`gap` is usually cleaner than adding margin to every child.
+
+### Sizing Utilities
+
+`w-full` means width is 100% of the parent.
+
+`h-full` means height is 100% of the parent.
+
+`min-h-screen` means minimum height is the full viewport height.
+
+The auth pages use `min-h-screen` so the split card can center vertically.
+
+`min-h-20` gives an element a minimum height from Tailwind's spacing scale.
+
+`min-h-[clamp(220px,34vh,360px)]` uses a custom CSS clamp value.
+
+`clamp(min, preferred, max)` means:
+
+- never smaller than `220px`
+- prefer `34vh`
+- never larger than `360px`
+
+This keeps the empty-state card tall enough to look intentional without
+creating excessive trailing space on larger screens.
+
+`max-w-sm`, `max-w-[1000px]`, and similar classes cap how wide content can get.
+
+Max-width prevents forms from becoming too stretched on desktop.
+
+### Typography Utilities
+
+`text-sm`, `text-lg`, `text-2xl`, and `text-3xl` control font size.
+
+`text-[11px]` uses an exact custom font size.
+
+Exact sizes are useful for small labels and dashboard metadata.
+
+`font-medium`, `font-semibold`, `font-bold`, and `font-black` control font
+weight.
+
+`font-black` is heavier than `font-bold`.
+
+The app uses heavier weights for metrics and section labels.
+
+`uppercase` transforms text into uppercase letters.
+
+`tracking-wider`, `tracking-widest`, and `tracking-[0.2em]` control letter
+spacing.
+
+This is the Tailwind class for what people often call "tracking".
+
+If you see "tracing" in notes, that usually means `tracking`.
+
+`tracking-[0.2em]` is an arbitrary letter-spacing value.
+
+It creates a technical dashboard label style.
+
+`leading-none` makes line-height tight.
+
+`leading-relaxed` makes line-height more open.
+
+The app uses relaxed line-height for readable paragraphs and tighter line-height
+for compact metric labels.
+
+### Border, Radius, And Shadow Utilities
+
+`border` adds a default 1px border.
+
+`border-blue-100` colors the border light blue.
+
+`border-slate-100` colors the border light slate.
+
+`border-dashed` changes the border style to dashed.
+
+The empty state uses dashed borders to feel like a drop zone or placeholder.
+
+`rounded-lg`, `rounded-2xl`, `rounded-3xl`, and `rounded-full` control corner
+rounding.
+
+`rounded-full` makes pills, circles, and avatar shapes.
+
+`rounded-[28px]` uses an exact custom radius.
+
+This is useful when matching a generated UI design that uses a specific large
+radius.
+
+`shadow-sm`, `shadow-lg`, and custom `shadow-[...]` utilities control box
+shadow.
+
+Example:
+
+```tsx
+className="shadow-[0_16px_45px_rgba(37,99,235,0.08)]"
+```
+
+The first value is horizontal offset.
+
+The second value is vertical offset.
+
+The third value is blur radius.
+
+The `rgba(...)` value defines the shadow color and opacity.
+
+The app uses soft blue shadows to make cards feel lifted without becoming dark.
+
+### Positioning And Layering Utilities
+
+`relative` makes an element the positioning context for children.
+
+`absolute` positions a child relative to the nearest positioned ancestor.
+
+The tooltip wrapper uses `relative`.
+
+The tooltip bubble uses `absolute`.
+
+That is how the tooltip can sit above the button.
+
+`fixed` positions an element relative to the viewport.
+
+The mobile floating create and logout controls use fixed positioning.
+
+`bottom-6` places a fixed element near the bottom.
+
+`right-6` places it near the right edge.
+
+`z-30` controls stacking order.
+
+A higher z-index helps overlays appear above cards.
+
+### State And Interaction Variants
+
+`hover:bg-blue-800` changes background color on mouse hover.
+
+`hover:text-slate-700` changes text color on hover.
+
+`focus:outline-none` removes the browser's default outline.
+
+This should only be used when another visible focus style is added.
+
+The app pairs it with:
+
+```tsx
+focus:ring-2 focus:ring-blue-500
+```
+
+`focus:ring-2` adds a visible focus ring.
+
+`focus:ring-blue-500` makes the ring blue.
+
+This keeps keyboard navigation visible and accessible.
+
+`transition` enables smooth changes between normal, hover, and focus states.
+
+`duration-150` or `duration-300` controls how long the transition takes.
+
+`group` marks a parent as a hover/focus coordination group.
+
+`group-hover:opacity-100` changes a child when the parent is hovered.
+
+`group-focus-within:opacity-100` changes a child when any focusable element
+inside the parent receives focus.
+
+The tooltip system relies on these group variants.
+
+### Why Some Tailwind Classes Look Unusual
+
+Classes with square brackets are arbitrary-value utilities.
+
+They are still Tailwind classes.
+
+They simply express values that are not part of the default Tailwind scale.
+
+Examples from this project:
+
+```tsx
+rounded-[28px]
+shadow-[0_16px_45px_rgba(37,99,235,0.08)]
+min-h-[clamp(220px,34vh,360px)]
+grid-cols-[minmax(0,1fr)_320px]
+tracking-[0.2em]
+```
+
+These are used when the design needs exact spacing, exact shadows, exact grid
+columns, or exact letter spacing.
+
+Use them intentionally.
+
+For normal spacing and colors, prefer standard Tailwind utilities like `p-5`,
+`gap-4`, `bg-blue-600`, and `text-slate-500`.
+
 ### Dashboard Tooltips
 
 The dashboard now includes a small `DashboardTooltip` helper in:
