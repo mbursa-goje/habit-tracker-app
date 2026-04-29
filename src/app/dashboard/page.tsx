@@ -351,12 +351,12 @@ export default function Dashboard() {
                         }deg, #e2e8f0 0deg)`,
                     }}
                   >
-                    <div className="grid h-full w-full place-items-center rounded-full bg-white shadow-inner">
+                    <div className="grid h-full w-full place-items-center rounded-full bg-white px-2 shadow-inner">
                       <div className="text-center">
                         <p className="text-2xl font-black leading-none text-slate-800 sm:text-3xl">
                           {progressPercent}%
                         </p>
-                        <p className="mt-1 text-[9px] font-bold uppercase leading-none tracking-[0.2em] text-slate-500 sm:text-[10px]">
+                        <p className="mt-1 text-[8px] font-bold uppercase leading-none tracking-[0.14em] text-slate-500 sm:text-[9px]">
                           Daily Goal
                         </p>
                       </div>

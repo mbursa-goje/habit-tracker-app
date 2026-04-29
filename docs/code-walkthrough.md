@@ -949,6 +949,29 @@ small screens around 320px wide.
 
 The inner white circle fills the remaining space.
 
+The inner white circle also uses:
+
+```tsx
+px-2
+```
+
+`px-2` adds horizontal padding inside the circle.
+
+That gives the `Daily Goal` label breathing room.
+
+The label uses:
+
+```tsx
+text-[8px] tracking-[0.14em] sm:text-[9px]
+```
+
+`text-[8px]` keeps the label compact on the smallest screens.
+
+`sm:text-[9px]` lets it become slightly larger when more width is available.
+
+`tracking-[0.14em]` keeps the premium spaced-label look without stretching the
+words so far that they press against the ring.
+
 The percentage uses a stronger text size.
 
 The `Daily Goal` label has a small top margin and tighter line height.
