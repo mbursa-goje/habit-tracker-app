@@ -63,7 +63,7 @@ export default function HabitForm({
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="grid gap-5 2xl:grid-cols-[minmax(0,1fr)_360px]">
       <form
         data-testid="habit-form"
         onSubmit={handleSubmit}
@@ -140,22 +140,22 @@ export default function HabitForm({
         </div>
 
         <div className="mt-8 border-t border-slate-200 pt-6">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button
               type="submit"
               data-testid="habit-save-button"
-              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-3 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+              className="inline-flex min-h-12 w-full min-w-44 flex-1 items-center justify-center gap-2 rounded-md bg-blue-700 px-5 py-3 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <Save className="h-4 w-4" />
+              <Save className="h-4 w-4 shrink-0" />
               <span className="whitespace-nowrap">Save Changes</span>
             </button>
 
             <button
               type="button"
               onClick={onDiscard}
-              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-blue-700 bg-white px-4 py-3 text-xs font-bold uppercase tracking-wide text-blue-700 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+              className="inline-flex min-h-12 w-full min-w-44 flex-1 items-center justify-center gap-2 rounded-md border border-blue-700 bg-white px-5 py-3 text-sm font-bold uppercase tracking-wide text-blue-700 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <RotateCcw className="h-4 w-4" />
+              <RotateCcw className="h-4 w-4 shrink-0" />
               <span className="whitespace-nowrap">Discard</span>
             </button>
 
@@ -163,9 +163,9 @@ export default function HabitForm({
               <button
                 type="button"
                 onClick={() => setIsConfirmingDelete(true)}
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-red-500 bg-white px-4 py-3 text-xs font-bold uppercase tracking-wide text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400 sm:col-span-2 sm:text-sm xl:col-span-1"
+                className="inline-flex min-h-12 w-full min-w-44 flex-1 items-center justify-center gap-2 rounded-md border border-red-500 bg-white px-5 py-3 text-sm font-bold uppercase tracking-wide text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 shrink-0" />
                 <span className="whitespace-nowrap">Delete Habit</span>
               </button>
             )}
