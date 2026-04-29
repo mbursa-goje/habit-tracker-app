@@ -202,44 +202,50 @@ export default function HabitForm({
       </form>
 
       <aside className="h-full">
-        <section className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-5">
+        <section className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-5 lg:p-7">
           <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
             Performance Summary
           </h3>
 
-          <div className="mt-5 rounded bg-blue-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 place-items-center rounded bg-emerald-300 text-emerald-900">
-                <Flame className="h-6 w-6" />
+          <div className="flex flex-1 flex-col justify-center gap-8 py-8">
+            <div className="rounded-xl bg-blue-50 p-5 lg:p-6">
+              <div className="flex items-center gap-4">
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-emerald-300 text-emerald-900 lg:h-16 lg:w-16">
+                  <Flame className="h-7 w-7 lg:h-8 lg:w-8" />
+                </div>
+
+                <div>
+                  <p className="text-base font-semibold text-slate-500">
+                    Current Streak
+                  </p>
+                  <p className="text-2xl font-bold text-slate-950 lg:text-3xl">
+                    {streak} Days
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-base font-semibold text-slate-950">
+                  Completion Rate
+                </p>
+                <p className="text-lg font-bold text-blue-700">
+                  {completionRate}%
+                </p>
               </div>
 
-              <div>
-                <p className="text-sm font-semibold text-slate-500">
-                  Current Streak
-                </p>
-                <p className="text-xl font-semibold text-slate-950">
-                  {streak} Days
-                </p>
+              <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-blue-50">
+                <div
+                  className="h-full rounded-full bg-blue-700"
+                  style={{ width: `${completionRate}%` }}
+                />
               </div>
-            </div>
-          </div>
 
-          <div className="mt-6">
-            <div className="flex items-center justify-between">
-              <p className="font-semibold text-slate-950">Completion Rate</p>
-              <p className="font-semibold text-blue-700">{completionRate}%</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Last 30 days performance
+              </p>
             </div>
-
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-blue-50">
-              <div
-                className="h-full rounded-full bg-blue-700"
-                style={{ width: `${completionRate}%` }}
-              />
-            </div>
-
-            <p className="mt-2 text-xs font-semibold uppercase text-slate-400">
-              Last 30 days performance
-            </p>
           </div>
         </section>
       </aside>

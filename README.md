@@ -157,7 +157,9 @@ The dashboard keeps the TRD test IDs in place while adding user-facing polish:
   immediately see the form they just opened.
 - Create/edit mode uses the full dashboard width on larger screens, and the
   habit form performance summary fills the remaining right-side space instead
-  of leaving a short panel with unused space beside it.
+  of leaving a short panel with unused space beside it. Its streak and
+  completion content is centered inside the available height and scaled up on
+  larger screens so the panel does not feel empty.
 - Empty states, dashboard summary tiles, the habit form performance summary,
   and the Next Up rail card use centered or stretched layouts to avoid awkward
   trailing blank space on larger screens. The no-habits panel uses responsive

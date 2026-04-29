@@ -932,6 +932,32 @@ The section itself fills that column.
 That removes the short-card effect where the performance summary ended early
 and left a blank right-side area in create/edit mode.
 
+Inside the summary section, the performance content uses:
+
+```tsx
+flex flex-1 flex-col justify-center gap-8 py-8
+```
+
+`flex-1` lets the content area occupy the remaining height below the
+`Performance Summary` heading.
+
+`flex-col` stacks the streak block and completion block vertically.
+
+`justify-center` centers those blocks inside the available height.
+
+`gap-8` creates stronger vertical rhythm between the streak block and the
+completion meter.
+
+`py-8` adds top and bottom breathing room so the centered content does not touch
+the panel edges.
+
+The streak tile uses larger icon and text sizes on large screens.
+
+The completion bar uses a taller `h-3` track.
+
+Those size changes make the summary feel intentional in a tall desktop column
+instead of looking like small content stuck at the top of an empty panel.
+
 ### Dashboard Summary Ring
 
 The dashboard progress ring was enlarged because the first version felt tight.
