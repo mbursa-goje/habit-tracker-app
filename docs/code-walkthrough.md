@@ -1,8 +1,6 @@
 # Habit Tracker Code Walkthrough
 
 This file is a dense study guide for the current Habit Tracker codebase.
-Use it as a reference while coding, debugging, reviewing commits, or preparing
-for mentor questions.
 
 The production files should stay readable and professional. This document is
 where the deep line-by-line explanation lives.
@@ -69,41 +67,6 @@ based on the URL.
 - Render `<html>`, `<body>`, and `{children}`.
 
 `page.tsx` files should contain route-specific behavior.
-
-## Commit Message Reference
-
-Use this format:
-
-```text
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-The type is lowercase:
-
-- `feat` means user-facing feature.
-- `fix` means user-facing bug fix.
-- `docs` means documentation-only change.
-- `style` means visual or formatting change that does not alter behavior.
-- `refactor` means behavior stays the same but code structure changes.
-- `test` means tests are added or corrected.
-- `config` means configuration changes.
-- `build` means build system or dependency-related changes.
-- `chore` means maintenance work.
-
-The subject should be imperative:
-
-- Good: `feat(auth): add login flow`
-- Avoid: `feat(auth): added login flow`
-
-The subject should not end with a period.
-
-The body should explain what and why.
-
-The footer can mention TRD alignment, issue references, or breaking changes.
 
 ## `package.json` Test Scripts
 
