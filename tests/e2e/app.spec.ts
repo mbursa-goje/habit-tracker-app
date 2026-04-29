@@ -53,17 +53,13 @@ function createHabit(overrides: Partial<StoredHabit> = {}): StoredHabit {
 
 async function resetBrowserState(page: Page, context: BrowserContext) {
   await context.setOffline(false);
-  await page.goto("/login");
+  await context.clearCookies();
+
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
 
   await page.evaluate(async () => {
     localStorage.clear();
-
-    if ("serviceWorker" in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(
-        registrations.map((registration) => registration.unregister()),
-      );
-    }
+    sessionStorage.clear();
 
     if ("caches" in window) {
       const cacheNames = await caches.keys();
