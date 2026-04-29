@@ -18,7 +18,15 @@ function createUserId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export default function SignupForm() {
+type SignupFormProps = {
+  onSuccessRedirect?: (path: string) => void;
+};
+
+export default function SignupForm({
+  onSuccessRedirect = (path) => {
+    window.location.href = path;
+  },
+}: SignupFormProps = {}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -60,7 +68,7 @@ export default function SignupForm() {
       },
     );
 
-    window.location.href = "/dashboard";
+    onSuccessRedirect("/dashboard");
   }
 
   return (

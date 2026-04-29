@@ -10,7 +10,15 @@ function getStoredUsers(): User[] {
   return readLocalStorageValue<User[]>("habit-tracker-users", []);
 }
 
-export default function LoginForm() {
+type LoginFormProps = {
+  onSuccessRedirect?: (path: string) => void;
+};
+
+export default function LoginForm({
+  onSuccessRedirect = (path) => {
+    window.location.href = path;
+  },
+}: LoginFormProps = {}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -38,7 +46,7 @@ export default function LoginForm() {
       },
     );
 
-    window.location.href = "/dashboard";
+    onSuccessRedirect("/dashboard");
   }
 
   return (
