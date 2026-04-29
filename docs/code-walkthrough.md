@@ -609,6 +609,383 @@ This returns a new habit object.
 
 The original `habit` object is not mutated.
 
+## `src/lib/storage.ts`
+
+Purpose: provide a React-friendly localStorage bridge using
+`useSyncExternalStore`.
+
+This file is useful because localStorage is outside React.
+
+React does not automatically re-render when localStorage changes.
+
+`useSyncExternalStore` is React's official hook for subscribing to external
+state sources.
+
+```ts
+"use client";
+```
+
+The storage helper uses browser APIs.
+
+`window` and `localStorage` only exist in the browser.
+
+The helper also imports React hooks.
+
+That makes it a Client Component module.
+
+```ts
+import { useMemo, useSyncExternalStore } from "react";
+```
+
+`useSyncExternalStore` subscribes React to an external store.
+
+`useMemo` parses the storage snapshot only when the raw stored string changes.
+
+```ts
+const STORAGE_CHANGE_EVENT = "habit-tracker-storage";
+```
+
+This names a custom browser event.
+
+The native `storage` event fires in other tabs.
+
+The native `storage` event does not fire in the same tab that called
+`localStorage.setItem`.
+
+The custom event fills that same-tab gap.
+
+```ts
+type StorageChangeDetail = {
+  key: string;
+};
+```
+
+This describes the custom event payload.
+
+The payload stores which localStorage key changed.
+
+That lets subscribers ignore unrelated storage writes.
+
+```ts
+function getSnapshotForKey(key: string): string | null {
+```
+
+This reads the current raw localStorage value for one key.
+
+`useSyncExternalStore` calls this function to know the current snapshot.
+
+```ts
+if (typeof window === "undefined") {
+  return null;
+}
+```
+
+This protects server rendering.
+
+There is no `window` on the server.
+
+Returning `null` gives React a safe server snapshot.
+
+```ts
+return window.localStorage.getItem(key);
+```
+
+This returns the raw localStorage string.
+
+It returns `null` when the key is missing.
+
+The snapshot intentionally stays as a string.
+
+Returning parsed arrays or objects directly could create a new reference on
+every read.
+
+New references can make external store snapshots unstable.
+
+```ts
+function emitStorageChange(key: string) {
+```
+
+This broadcasts that one localStorage key changed.
+
+It is called after local writes and removals.
+
+```ts
+window.dispatchEvent(
+  new CustomEvent<StorageChangeDetail>(STORAGE_CHANGE_EVENT, {
+    detail: { key },
+  }),
+);
+```
+
+`dispatchEvent` sends the custom event through `window`.
+
+`CustomEvent` carries the changed key in `detail`.
+
+Any subscriber listening for `habit-tracker-storage` can react.
+
+```ts
+function parseSnapshot<T>(snapshot: string | null, fallback: T): T {
+```
+
+This converts a raw localStorage string into typed data.
+
+`T` is the expected value type.
+
+`fallback` is returned when the key is missing or invalid.
+
+```ts
+if (snapshot === null) {
+  return fallback;
+}
+```
+
+Missing localStorage keys become fallback values.
+
+Example: missing `habit-tracker-habits` becomes `[]`.
+
+```ts
+try {
+  return JSON.parse(snapshot) as T;
+} catch {
+  return fallback;
+}
+```
+
+`JSON.parse` converts stored JSON text back into JavaScript data.
+
+The `catch` prevents broken localStorage data from crashing the app.
+
+Returning fallback keeps the UI deterministic.
+
+```ts
+export function useLocalStorageValue<T>(key: string, fallback: T): T {
+```
+
+This is the hook used by React components.
+
+It subscribes a component to one localStorage key.
+
+When that key changes, React re-renders the component.
+
+```ts
+const snapshot = useSyncExternalStore(
+  (onStoreChange) => subscribeToLocalStorageKey(key, onStoreChange),
+  () => getSnapshotForKey(key),
+  () => null,
+);
+```
+
+The first argument subscribes to changes.
+
+`onStoreChange` is React's callback.
+
+React provides it.
+
+The storage helper calls it when the watched key changes.
+
+The second argument reads the current browser snapshot.
+
+The third argument reads the server snapshot.
+
+The server snapshot returns `null` because localStorage is unavailable on the
+server.
+
+```ts
+return useMemo(
+  () => parseSnapshot(snapshot, fallback),
+  [fallback, snapshot],
+);
+```
+
+The raw string snapshot is parsed into typed data.
+
+`useMemo` avoids parsing again unless the string or fallback changes.
+
+```ts
+export function readLocalStorageValue<T>(key: string, fallback: T): T {
+```
+
+This is the non-hook read helper.
+
+It is useful inside event handlers or one-time checks.
+
+The root splash route uses it during redirect logic.
+
+Login and signup use it to read existing users before submitting.
+
+```ts
+export function setLocalStorageValue<T>(key: string, value: T) {
+```
+
+This writes a typed value into localStorage.
+
+```ts
+localStorage.setItem(key, JSON.stringify(value));
+```
+
+localStorage only stores strings.
+
+`JSON.stringify` converts arrays and objects into strings.
+
+```ts
+emitStorageChange(key);
+```
+
+After writing, this tells same-tab subscribers to update.
+
+Without this custom event, the dashboard might not re-render immediately after
+a local write in the same browser tab.
+
+```ts
+export function removeLocalStorageValue(key: string) {
+```
+
+This removes a key from localStorage.
+
+Logout uses it for `habit-tracker-session`.
+
+```ts
+localStorage.removeItem(key);
+emitStorageChange(key);
+```
+
+The key is removed.
+
+Subscribers are notified.
+
+```ts
+export function subscribeToLocalStorageKey(
+  key: string,
+  onStoreChange: () => void,
+) {
+```
+
+This connects React to localStorage changes for one key.
+
+It returns an unsubscribe function.
+
+`useSyncExternalStore` uses that unsubscribe function during cleanup.
+
+```ts
+function handleStorage(event: StorageEvent) {
+  if (event.key === key || event.key === null) {
+    onStoreChange();
+  }
+}
+```
+
+This listens for native browser `storage` events.
+
+Those events usually fire when another tab changes localStorage.
+
+`event.key === key` means the watched key changed.
+
+`event.key === null` can happen when storage is cleared.
+
+```ts
+function handleCustomStorage(event: Event) {
+```
+
+This listens for the custom same-tab event.
+
+```ts
+const customEvent = event as CustomEvent<StorageChangeDetail>;
+```
+
+The generic `Event` is narrowed to the custom event shape.
+
+```ts
+if (customEvent.detail?.key === key) {
+  onStoreChange();
+}
+```
+
+Only the matching key triggers a React update.
+
+Unrelated localStorage writes are ignored.
+
+```ts
+window.addEventListener("storage", handleStorage);
+window.addEventListener(STORAGE_CHANGE_EVENT, handleCustomStorage);
+```
+
+The helper subscribes to both cross-tab and same-tab updates.
+
+```ts
+return () => {
+  window.removeEventListener("storage", handleStorage);
+  window.removeEventListener(STORAGE_CHANGE_EVENT, handleCustomStorage);
+};
+```
+
+This cleanup removes both listeners.
+
+React calls it when a component no longer needs the subscription.
+
+## `src/app/dashboard/page.tsx` Storage Refactor
+
+The dashboard now uses `useLocalStorageValue` instead of copying localStorage
+into React state manually.
+
+```tsx
+const storedSession = useLocalStorageValue<unknown>(
+  "habit-tracker-session",
+  null,
+);
+```
+
+This subscribes the dashboard to the session key.
+
+The value is read as `unknown` first because localStorage data is runtime data.
+
+Runtime data must be checked before it is trusted.
+
+```tsx
+const habits = useLocalStorageValue<Habit[]>(
+  "habit-tracker-habits",
+  EMPTY_HABITS,
+);
+```
+
+This subscribes the dashboard to the habits key.
+
+When a habit is created, edited, deleted, or completed, the key changes.
+
+The storage hook notices the change and React re-renders the dashboard.
+
+```tsx
+const session = isSession(storedSession) ? storedSession : null;
+```
+
+This validates the unknown storage value.
+
+Only an object with string `userId` and string `email` becomes a session.
+
+```tsx
+function saveHabits(nextHabits: Habit[]) {
+  setLocalStorageValue("habit-tracker-habits", nextHabits);
+}
+```
+
+The dashboard no longer calls `setHabits`.
+
+The source of truth is the external store.
+
+Writing localStorage triggers the subscription.
+
+The subscription provides the new value back to React.
+
+```tsx
+function handleLogout() {
+  removeLocalStorageValue("habit-tracker-session");
+  window.location.href = "/login";
+}
+```
+
+Logout now removes the session through the storage helper.
+
+That removal also notifies subscribers.
+
 ## `src/components/auth/LoginForm.tsx`
 
 Purpose: render and process the `/login` form.
@@ -635,6 +1012,26 @@ import type { User } from "@/types/auth";
 This imports the TRD `User` type.
 
 The login form uses it to type the parsed `habit-tracker-users` array.
+
+```tsx
+import { readLocalStorageValue, setLocalStorageValue } from "@/lib/storage";
+```
+
+This imports the localStorage helper functions.
+
+`readLocalStorageValue` reads and safely parses a stored value.
+
+`setLocalStorageValue` writes JSON and emits the storage change event.
+
+```tsx
+import { readLocalStorageValue, setLocalStorageValue } from "@/lib/storage";
+```
+
+This imports the shared localStorage helpers.
+
+`readLocalStorageValue` safely reads existing users.
+
+`setLocalStorageValue` writes users/session and notifies subscribers.
 
 ```tsx
 import { AlertCircle, ArrowRight } from "lucide-react";
@@ -666,45 +1063,23 @@ import { FormEvent, useState } from "react";
 function getStoredUsers(): User[] {
 ```
 
-This helper reads users from localStorage.
+This helper reads users through the storage helper.
 
 It returns an array of users.
 
 Keeping this logic in a helper makes submit handling easier to read.
 
 ```tsx
-  const usersData = localStorage.getItem("habit-tracker-users");
+return readLocalStorageValue<User[]>("habit-tracker-users", []);
 ```
 
 This reads the TRD users key.
 
-If no user has signed up yet, the value may be `null`.
+The expected value is `User[]`.
 
-```tsx
-  if (!usersData) {
-    return [];
-  }
-```
+If the key is missing or invalid, the fallback is `[]`.
 
-If localStorage has no users value, return an empty array.
-
-This prevents JSON parsing `null`.
-
-```tsx
-  try {
-    return JSON.parse(usersData) as User[];
-  } catch {
-    return [];
-  }
-```
-
-`JSON.parse` converts stored JSON text back into JavaScript objects.
-
-`as User[]` tells TypeScript what shape we expect.
-
-The `catch` protects the page from crashing if localStorage has invalid JSON.
-
-Returning `[]` makes invalid stored users behave like no users.
+The parsing and error handling live in `src/lib/storage.ts`.
 
 ```tsx
 export default function LoginForm() {
@@ -807,12 +1182,12 @@ The message must stay `Invalid email or password`.
 `return` stops the successful login path.
 
 ```tsx
-localStorage.setItem(
+setLocalStorageValue(
   "habit-tracker-session",
-  JSON.stringify({
+  {
     userId: matchingUser.id,
     email: matchingUser.email,
-  }),
+  },
 );
 ```
 
@@ -822,7 +1197,9 @@ The key is exactly `habit-tracker-session`.
 
 The stored object matches the TRD `Session` type.
 
-`JSON.stringify` converts the object into localStorage text.
+`setLocalStorageValue` converts the object into localStorage text.
+
+It also emits the custom storage event for same-tab subscribers.
 
 ```tsx
 window.location.href = "/dashboard";
@@ -1154,45 +1531,23 @@ import { FormEvent, useState } from "react";
 function getStoredUsers(): User[] {
 ```
 
-This helper reads users from `localStorage`.
+This helper reads users through the storage helper.
 
 It returns an array every time.
 
 That keeps submit logic simple.
 
 ```tsx
-const usersData = localStorage.getItem("habit-tracker-users");
+return readLocalStorageValue<User[]>("habit-tracker-users", []);
 ```
 
 This reads the exact TRD storage key for users.
 
-The value is either JSON text or `null`.
+The expected value is `User[]`.
 
-```tsx
-if (!usersData) {
-  return [];
-}
-```
+If no users exist yet, the fallback `[]` lets the first signup succeed cleanly.
 
-If no users exist yet, return an empty array.
-
-This lets the first signup succeed cleanly.
-
-```tsx
-try {
-  return JSON.parse(usersData) as User[];
-} catch {
-  return [];
-}
-```
-
-`JSON.parse` converts stored text into JavaScript data.
-
-`as User[]` tells TypeScript the expected shape.
-
-The `catch` protects the page if localStorage contains invalid JSON.
-
-Returning `[]` is a safe fallback for this local-only stage.
+The parsing and invalid JSON fallback live in `src/lib/storage.ts`.
 
 ```tsx
 function createUserId(): string {
@@ -1342,9 +1697,9 @@ This creates the new user object.
 `createdAt` stores an ISO timestamp.
 
 ```tsx
-localStorage.setItem(
+setLocalStorageValue(
   "habit-tracker-users",
-  JSON.stringify([...users, newUser]),
+  [...users, newUser],
 );
 ```
 
@@ -1354,15 +1709,17 @@ The key is exactly `habit-tracker-users`.
 
 `[...users, newUser]` creates a new array with the new user appended.
 
-`JSON.stringify` converts the array into text for localStorage.
+`setLocalStorageValue` converts the array into text for localStorage.
+
+It also emits the same-tab storage change event.
 
 ```tsx
-localStorage.setItem(
+setLocalStorageValue(
   "habit-tracker-session",
-  JSON.stringify({
+  {
     userId: newUser.id,
     email: newUser.email,
-  }),
+  },
 );
 ```
 
@@ -1375,6 +1732,8 @@ The stored object matches the TRD `Session` type.
 `userId` links the session to the new user.
 
 `email` stores the active user's email.
+
+The storage helper notifies subscribers after writing the session.
 
 ```tsx
 window.location.href = "/dashboard";
@@ -1808,44 +2167,48 @@ This creates a unique id for new habits.
 The TRD requires habit IDs to be unique strings.
 
 ```tsx
-function readStoredHabits(): Habit[] {
+function isSession(value: unknown): value is Session {
 ```
 
-This reads `habit-tracker-habits`.
+This checks whether a localStorage value really matches the TRD session shape.
 
-If the key is missing, it returns an empty array.
+The dashboard reads session data as `unknown` first.
 
-If the stored JSON is broken, it resets the key to `[]`.
+That is safer than trusting parsed JSON immediately.
 
-This prevents the dashboard from crashing on bad localStorage data.
+The function returns `true` only when `userId` and `email` are strings.
 
 ```tsx
-function readStoredSession(): Session | null {
+const storedSession = useLocalStorageValue<unknown>(
+  "habit-tracker-session",
+  null,
+);
 ```
 
-This reads `habit-tracker-session`.
+This subscribes the dashboard to the session key.
 
-If no valid session exists, it returns `null`.
-
-The dashboard uses `null` to redirect to `/login`.
+The value starts as `unknown` because localStorage can contain anything.
 
 ```tsx
-const [session, setSession] = useState<Session | null>(null);
+const habits = useLocalStorageValue<Habit[]>(
+  "habit-tracker-habits",
+  EMPTY_HABITS,
+);
 ```
 
-`session` stores the logged-in user session.
+This subscribes the dashboard to the habits key.
 
-It starts as `null` until localStorage is read.
+The fallback is the stable empty array constant `EMPTY_HABITS`.
+
+When the storage helper writes new habits, this hook receives the new snapshot.
 
 ```tsx
-const [habits, setHabits] = useState<Habit[]>([]);
+const session = isSession(storedSession) ? storedSession : null;
 ```
 
-`habits` stores all habits from localStorage.
+This converts untrusted storage data into a trusted `Session | null`.
 
-This includes habits for all users.
-
-Filtering happens separately.
+Invalid session data becomes `null`.
 
 ```tsx
 const [isFormOpen, setIsFormOpen] = useState(false);
@@ -1863,30 +2226,28 @@ It contains a habit object when editing.
 
 ```tsx
 useEffect(() => {
-  const storedSession = readStoredSession();
+  if (!storedSession) {
+    window.location.href = "/login";
+    return;
+  }
 ```
 
-The dashboard reads the session after the browser renders.
-
-This must happen client-side because localStorage is browser-only.
-
-```tsx
-if (!storedSession) {
-  window.location.href = "/login";
-  return;
-}
-```
-
-This protects `/dashboard`.
+This protects `/dashboard` when no session exists.
 
 Unauthenticated users are redirected to `/login`.
 
 ```tsx
-setSession(storedSession);
-setHabits(readStoredHabits());
+if (!session) {
+  removeLocalStorageValue("habit-tracker-session");
+  window.location.href = "/login";
+}
 ```
 
-Once authenticated, the dashboard stores the session and loads habits.
+This handles invalid session shapes.
+
+Bad session data is removed.
+
+Then the user is redirected to `/login`.
 
 ```tsx
 const userHabits = useMemo(
@@ -1939,16 +2300,17 @@ If there are no habits, the best streak is zero.
 
 ```tsx
 function saveHabits(nextHabits: Habit[]) {
-  setHabits(nextHabits);
-  localStorage.setItem("habit-tracker-habits", JSON.stringify(nextHabits));
+  setLocalStorageValue("habit-tracker-habits", nextHabits);
 }
 ```
 
 This is the central save function.
 
-It updates React state.
+It writes the next habits array to localStorage through the storage helper.
 
-It writes the same data to localStorage.
+The storage helper emits a change event.
+
+`useLocalStorageValue` hears that event and gives React the updated array.
 
 Every create, edit, delete, and toggle goes through this function.
 
@@ -2259,6 +2621,16 @@ Keeping the UI in a separate component makes the root page focused on boot
 logic.
 
 ```tsx
+import { readLocalStorageValue, removeLocalStorageValue } from "@/lib/storage";
+```
+
+This imports storage helpers for the boot route.
+
+The root route does not subscribe because it only needs one delayed decision.
+
+It still uses the helper so parsing and removal behavior stays consistent.
+
+```tsx
 import { useRouter } from "next/navigation";
 ```
 
@@ -2295,15 +2667,20 @@ This helper checks whether a valid session exists.
 The helper keeps the effect easier to read.
 
 ```tsx
-const sessionData = localStorage.getItem("habit-tracker-session");
+const session = readLocalStorageValue<{
+  userId?: unknown;
+  email?: unknown;
+} | null>("habit-tracker-session", null);
 ```
 
 This reads the exact TRD session key.
 
-If the user is logged in, this should contain JSON session text.
+The expected value has optional `userId` and `email` fields.
+
+The fallback is `null`.
 
 ```tsx
-if (!sessionData) {
+if (!session) {
   return false;
 }
 ```
@@ -2313,21 +2690,9 @@ If the key is missing, there is no active session.
 The root page should redirect unauthenticated users to `/login`.
 
 ```tsx
-try {
-  const session = JSON.parse(sessionData) as {
-    userId?: unknown;
-    email?: unknown;
-  };
-```
-
-`JSON.parse` converts the stored text into an object.
-
-The temporary type uses `unknown` because localStorage data cannot be trusted.
-
-The code validates the fields before accepting the session.
-
-```tsx
-return typeof session.userId === "string" && typeof session.email === "string";
+if (typeof session.userId === "string" && typeof session.email === "string") {
+  return true;
+}
 ```
 
 The session is treated as valid only when both required TRD fields are strings.
@@ -2337,13 +2702,11 @@ The session is treated as valid only when both required TRD fields are strings.
 `email` stores the active user's email.
 
 ```tsx
-} catch {
-  localStorage.removeItem("habit-tracker-session");
-  return false;
-}
+removeLocalStorageValue("habit-tracker-session");
+return false;
 ```
 
-If the stored session is invalid JSON, remove it.
+If the stored session shape is invalid, remove it.
 
 Then report that no valid session exists.
 
